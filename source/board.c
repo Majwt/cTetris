@@ -13,7 +13,7 @@ struct board
     int x, y;
     int width, height;
     SDL_Renderer *pRenderer;
-    int occupied[23][BOARD_COLUMNS + BOARD_COLUMNS_PADDING * 2];
+    int occupied[BOARD_ROWS][BOARD_COLUMNS];
     SDL_Color colors[7];
     Tetrino activeTetrino;
     Tetrino nextTetrino;
@@ -26,15 +26,11 @@ Board *CreateBoard(SDL_Renderer *pRenderer)
 {
     Board *board = malloc(sizeof(struct board));
     board->pRenderer = pRenderer;
-    for (int i = 0; i < 23; i++)
+    for (int i = 0; i < BOARD_ROWS; i++)
     {
-        for (int j = 0; j < BOARD_COLUMNS + BOARD_COLUMNS_PADDING * 2; j++)
+        for (int j = 0; j < BOARD_COLUMNS; j++)
         {
             board->occupied[i][j] = 0;
-            if (j == BOARD_COLUMNS_PADDING - 1 || j == BOARD_COLUMNS + BOARD_COLUMNS_PADDING - 1 || i >= 20)
-            {
-                board->occupied[i][j] = -1;
-            }
         }
     }
     board->now_t = 0;
@@ -58,8 +54,8 @@ Board *CreateBoard(SDL_Renderer *pRenderer)
     // board->x = window_width / 2 - (BOARD_COLUMNS + BOARD_COLUMNS_PADDING * 2) / 2 * TETRINOSIZE;
     board->x = BOARD_X;
     board->y = BOARD_Y;
-    board->width = BOARD_COLUMNS * TETRINOSIZE;
-    board->height = 20 * TETRINOSIZE;
+    board->width = BOARD_WIDTH;
+    board->height = BOARD_HEIGHT;
 
     Tetrino tmp, nextPiece;
     RandomPiece(&tmp);
@@ -79,9 +75,9 @@ void DrawOccupied(Board *pBoard)
     rect.x = pBoard->x;
     rect.y = pBoard->y;
 
-    for (int y = 0; y < 20; y++)
+    for (int y = 0; y < BOARD_ROWS; y++)
     {
-        for (int x = BOARD_COLUMNS_PADDING; x < BOARD_COLUMNS + BOARD_COLUMNS_PADDING - 1; x++)
+        for (int x = 0; x < BOARD_COLUMNS; x++)
         {
             int8_t current = pBoard->occupied[y][x];
 
@@ -93,7 +89,8 @@ void DrawOccupied(Board *pBoard)
                 {
                     current -= 10;
                 }
-                SDL_Color color = pBoard->colors[current - 1];
+                // printf("Current: %d\n",current);
+                SDL_Color color = pBoard->colors[current-1];
                 SDL_SetRenderDrawColor(pBoard->pRenderer, color.r, color.g, color.b, color.a);
                 SDL_RenderFillRect(pBoard->pRenderer, &rect);
             }
@@ -118,23 +115,26 @@ void DrawOccupied(Board *pBoard)
 /// @return 1 if collision is detected, else 0
 int TetrinoCollisionCheck(Board *pBoard)
 {
+    const int orientation = pBoard->activeTetrino.orientationIndex;
     for (int y = 0; y < 4; y++)
     {
         for (int x = 0; x < 4; x++)
         {
-            int activeTetrinoBlock = pBoard->activeTetrino.orientations[pBoard->activeTetrino.orientationIndex][y][x];
-            if (y + pBoard->activeTetrino.y < 0)
+            int activeTetrinoBlockValue = pBoard->activeTetrino.orientations[orientation][y][x];
+            int boardBlockX = x + pBoard->activeTetrino.x;
+            int boardBlockY = y + pBoard->activeTetrino.y;
+            if (boardBlockY < 0 || boardBlockX < 0 || boardBlockX > BOARD_COLUMNS-1 )
             {
-                if (pBoard->activeTetrino.orientations[pBoard->activeTetrino.orientationIndex][y][x] > 0)
+                if (activeTetrinoBlockValue > 0)
                 {
                     return 1;
                 }
                 continue;
             }
 
-            int boardBlock = pBoard->occupied[y + pBoard->activeTetrino.y][x + pBoard->activeTetrino.x];
+            int boardBlockValue = pBoard->occupied[boardBlockY][boardBlockX];
 
-            if (activeTetrinoBlock > 0 && boardBlock != 0 && boardBlock < 10)
+            if (activeTetrinoBlockValue > 0 && boardBlockValue != 0 && boardBlockValue < 10)
             {
                 return 1;
             }
@@ -147,11 +147,11 @@ void DrawTetrino(Board *pBoard)
 
     int y0 = pBoard->activeTetrino.y;
     int x0 = pBoard->activeTetrino.x;
-    for (int y = 0; y < 20; y++)
+    for (int y = 0; y < BOARD_ROWS; y++)
     {
-        for (int x = BOARD_COLUMNS_PADDING - 1; x < BOARD_COLUMNS + BOARD_COLUMNS_PADDING; x++)
+        for (int x = 0; x < BOARD_COLUMNS; x++)
         {
-            if (pBoard->occupied[y][x] > 10)
+            if (pBoard->occupied[y][x] > 10 || pBoard->occupied[y][x] < 0)
             {
                 pBoard->occupied[y][x] = 0;
             }
@@ -162,11 +162,11 @@ void DrawTetrino(Board *pBoard)
     {
         for (int x = 0; x < 4 && !hit; x++)
         {
-            int current = pBoard->activeTetrino.orientations[pBoard->activeTetrino.orientationIndex][y][x];
+            int activeTetrinoBlockValue = pBoard->activeTetrino.orientations[pBoard->activeTetrino.orientationIndex][y][x];
 
-            if (current > 0)
+            if (activeTetrinoBlockValue > 0)
             {
-                pBoard->occupied[y + y0][x + x0] = current + 10;
+                pBoard->occupied[y + y0][x + x0] = activeTetrinoBlockValue + 10;
             }
         }
     }
@@ -242,10 +242,11 @@ void RotateAntiClockwise(Board *pBoard)
 void ConvertToStatic(Board *pBoard)
 {
     pBoard->activeTetrino = pBoard->nextTetrino;
+    printf("(%d, %d) = %d\n",BOARD_ROWS-1,BOARD_COLUMNS-1,pBoard->occupied[BOARD_ROWS-1][BOARD_COLUMNS-1]);
     RandomPiece(&pBoard->nextTetrino);
-    for (int y = 0; y < 20; y++)
+    for (int y = 0; y < BOARD_ROWS; y++)
     {
-        for (int x = 0; x < BOARD_COLUMNS + BOARD_COLUMNS_PADDING; x++)
+        for (int x = 0; x < BOARD_COLUMNS; x++)
         {
             if (pBoard->occupied[y][x] > 10)
             {
@@ -258,7 +259,7 @@ void ConvertToStatic(Board *pBoard)
 void ShiftRowsDown(Board *pBoard, int y)
 {
 
-    for (int row = BOARD_COLUMNS_PADDING; row < BOARD_COLUMNS + BOARD_COLUMNS_PADDING - 1; row++)
+    for (int row = 0; row < BOARD_COLUMNS; row++)
     {
         for (int j = y; j > 1; j--)
         {
@@ -270,10 +271,10 @@ void ShiftRowsDown(Board *pBoard, int y)
 int ClearCompleteRows(Board *pBoard)
 {
     int lines = 0;
-    for (int y = 0; y < 20; y++)
+    for (int y = 0; y < BOARD_ROWS; y++)
     {
         bool completeRow = true;
-        for (int x = BOARD_COLUMNS_PADDING; x < BOARD_COLUMNS + BOARD_COLUMNS_PADDING - 1 && completeRow == true; x++)
+        for (int x = 0; x < BOARD_COLUMNS && completeRow == true; x++)
         {
             if (pBoard->occupied[y][x] == 0)
             {
@@ -331,6 +332,7 @@ bool isTetrinoOnGround(Board *pBoard)
 
 void NextRound(Board *pBoard, int *pScore, int *pLevel, int *pLines)
 {
+    // printf("Final Position: (%d, %d)\n",pBoard->activeTetrino.y+ pBoard->activeTetrino.width,pBoard->activeTetrino.x);
     ConvertToStatic(pBoard);
     int linesCleared = ClearCompleteRows(pBoard);
     *pScore += AddPoints(*pLevel, linesCleared);
