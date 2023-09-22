@@ -197,7 +197,7 @@ void DrawGameUI(Game *pGame)
 
     SDL_Rect rightTextRect;
     // SCore
-    rightTextRect.x = RIGHT_OF_BOARD + 20;
+    rightTextRect.x = BOARD_X+BOARD_WIDTH + 20;
     rightTextRect.y = BOARD_Y;
     sprintf(textBuffer, "Score");
     rightTextRect = ShowText(pGame->pRenderer, textBuffer, rightTextRect);
