@@ -8,8 +8,7 @@
 
 #define FPS 30
 
- 
-//TODO Highscore lista
+// TODO Highscore lista
 
 struct game
 {
@@ -35,7 +34,6 @@ void DrawGameUI(Game *pGame);
 
 int main(int argv, char **args)
 {
-    
 
     Game g = {0};
     if (!initiate(&g))
@@ -50,7 +48,7 @@ int initiate(Game *pGame)
 {
     srand(time(NULL));
     rand();
-    
+
     if (TTF_Init() == -1)
         printf("FONT ERROR\n");
     arial = TTF_OpenFont("./assets/BigBlueTermPlusNerdFont-Regular.ttf", 25);
@@ -190,17 +188,16 @@ void DrawGameUI(Game *pGame)
     char textBuffer[100];
 
     SDL_Rect linesRect;
-    // linesRect.x = BOARD_X + BOARD_WIDTH - BOARD_X_CENTER;
-    linesRect.x = BOARD_X + BOARD_WIDTH / 2 - 10;
+    linesRect.x = BOARD_X + BOARD_WIDTH / 2 - 153 / 2;
     linesRect.y = BOARD_Y - 50;
 
     // Lines
     sprintf(textBuffer, "Lines-%03d", pGame->lines);
-    ShowText(pGame->pRenderer, textBuffer, linesRect);
+    linesRect = ShowText(pGame->pRenderer, textBuffer, linesRect);
 
     SDL_Rect rightTextRect;
     // SCore
-    rightTextRect.x = RIGHT_OF_BOARD + 20;
+    rightTextRect.x = BOARD_X+BOARD_WIDTH + 20;
     rightTextRect.y = BOARD_Y;
     sprintf(textBuffer, "Score");
     rightTextRect = ShowText(pGame->pRenderer, textBuffer, rightTextRect);
@@ -213,7 +210,7 @@ void DrawGameUI(Game *pGame)
     rightTextRect = ShowText(pGame->pRenderer, "Next:", rightTextRect);
     ShowNextPiece(pGame->pBoard, rightTextRect.x, rightTextRect.y + rightTextRect.h);
 
-    // Level 
+    // Level
     rightTextRect.y += 5 * TETRINOSIZE;
     sprintf(textBuffer, "Level");
     rightTextRect = ShowText(pGame->pRenderer, textBuffer, rightTextRect);

@@ -2,6 +2,8 @@
 #define tetrino_h
 typedef struct tetrino Tetrino;
 
+
+enum pieceType {I=1,O,T,J,L,S,Z};
 struct tetrino
 {
     // top left
