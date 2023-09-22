@@ -1,0 +1,149 @@
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "defines.h"
+#include "tetrino.h"
+
+void fillTetrinoOrientation(Tetrino *pTetrino, int orientation[4][4][4])
+{
+    pTetrino->y = 0;
+    pTetrino->orientationIndex = 0;
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            for (int k = 0; k < 4; k++)
+            {
+                pTetrino->orientations[i][j][k] = orientation[i][j][k];
+            }
+        }
+    }
+}
+
+// TODO: Läs in från fil istället för hårdkodat
+Tetrino CreatePiece(int n)
+{
+    // Ser dåligt ut
+    int pieceOrientations[7][4][4][4] = {{
+                                             {{0, 0, 0, 0},
+                                              {I, I, I, I},
+                                              {0, 0, 0, 0},
+                                              {0, 0, 0, 0}},
+                                             {{0, 0, I, 0},
+                                              {0, 0, I, 0},
+                                              {0, 0, I, 0},
+                                              {0, 0, I, 0}},
+                                             {{0, 0, 0, 0},
+                                              {0, 0, 0, 0},
+                                              {I, I, I, I},
+                                              {0, 0, 0, 0}},
+                                             {{0, I, 0, 0},
+                                              {0, I, 0, 0},
+                                              {0, I, 0, 0},
+                                              {0, I, 0, 0}},
+                                         },
+                                         {{{0, 0, 0, 0},
+                                           {0, O, O, 0},
+                                           {0, O, O, 0},
+                                           {0, 0, 0, 0}},
+                                          {{0, 0, 0, 0},
+                                           {0, O, O, 0},
+                                           {0, O, O, 0},
+                                           {0, 0, 0, 0}},
+                                          {{0, 0, 0, 0},
+                                           {0, O, O, 0},
+                                           {0, O, O, 0},
+                                           {0, 0, 0, 0}},
+                                          {{0, 0, 0, 0},
+                                           {0, O, O, 0},
+                                           {0, O, O, 0},
+                                           {0, 0, 0, 0}}},
+                                         {
+                                             {{0, T, 0},
+                                              {T, T, T},
+                                              {0, 0, 0}},
+                                             {{0, T, 0},
+                                              {0, T, T},
+                                              {0, T, 0}},
+                                             {{0, 0, 0},
+                                              {T, T, T},
+                                              {0, T, 0}},
+                                             {{0, T, 0},
+                                              {T, T, 0},
+                                              {0, T, 0}},
+                                         },
+                                         {
+                                             {{J, 0, 0},
+                                              {J, J, J},
+                                              {0, 0, 0}},
+                                             {{0, J, J},
+                                              {0, J, 0},
+                                              {0, J, 0}},
+                                             {{0, 0, 0},
+                                              {J, J, J},
+                                              {0, 0, J}},
+                                             {{0, J, 0},
+                                              {0, J, 0},
+                                              {J, J, 0}},
+                                         },
+                                         {
+                                             {{0, 0, L},
+                                              {L, L, L},
+                                              {0, 0, 0}},
+                                             {{0, L, 0},
+                                              {0, L, 0},
+                                              {0, L, L}},
+                                             {{0, 0, 0},
+                                              {L, L, L},
+                                              {L, 0, 0}},
+                                             {{L, L, 0},
+                                              {0, L, 0},
+                                              {0, L, 0}},
+                                         },
+                                         {
+                                             {{0, S, S},
+                                              {S, S, 0},
+                                              {0, 0, 0}},
+                                             {{0, S, 0},
+                                              {0, S, S},
+                                              {0, 0, S}},
+                                             {{0, 0, 0},
+                                              {0, S, S},
+                                              {S, S, 0}},
+                                             {{S, 0, 0},
+                                              {S, S, 0},
+                                              {0, S, 0}},
+                                         },
+                                         {
+                                             {{Z, Z, 0},
+                                              {0, Z, Z},
+                                              {0, 0, 0}},
+                                             {{0, 0, Z},
+                                              {0, Z, Z},
+                                              {0, Z, 0}},
+                                             {{0, 0, 0},
+                                              {Z, Z, 0},
+                                              {0, Z, Z}},
+                                             {{0, Z, 0},
+                                              {Z, Z, 0},
+                                              {Z, 0, 0}},
+                                         }};
+    Tetrino piece;
+    fillTetrinoOrientation(&piece, pieceOrientations[n]);
+    piece.x = 7;
+    piece.y = 0;
+    if (n + 1 == I || n + 1 == O)
+    {
+        piece.width = 4;
+        piece.y = -1;
+    }
+    else
+    {
+        piece.width = 3;
+    }
+    return piece;
+}
+void RandomPiece(Tetrino *piece)
+{
+    *piece = CreatePiece(rand() % 7);
+}
