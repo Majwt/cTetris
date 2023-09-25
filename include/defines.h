@@ -20,5 +20,8 @@
 
 #define ONGROUND_TIME_MIN 0.01
 
+#define HIGHSCORE_SAVE_FILENAME "highscores.txt"
+#define HIGHSCORE_MAX_SAVES 10
+
 
 #endif
