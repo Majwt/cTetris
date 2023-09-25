@@ -35,6 +35,18 @@ void SaveHighscore(Pair highscores[])
 void LoadHighscore(Pair highscores[])
 {
     FILE *ptr = fopen(HIGHSCORE_SAVE_FILENAME, "r");
+    if (ptr == NULL)
+    {
+        printf("CREATING HIGHSCORE FILE\n");
+        for (int i = 0; i < HIGHSCORE_MAX_SAVES; i++)
+        {
+            highscores[i] = createPair("nan",0);
+        }
+        SaveHighscore(highscores);
+        fclose(ptr);
+        LoadHighscore(highscores);
+        return;
+    }
     char name[100];
     int readScore = 0;
     int i = 0;
