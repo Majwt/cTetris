@@ -3,18 +3,17 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include "defines.h"
-// #include "tetrino.h"
 #include "board.h"
+#include "highscore.h"
 
 #define FPS 30
-
-// TODO Highscore lista
 
 struct game
 {
     SDL_Window *pWindow;
     SDL_Renderer *pRenderer;
     Board *pBoard;
+    Pair HighScores[HIGHSCORE_MAX_SAVES];
     int score;
     int level;
     int lines;
@@ -86,6 +85,8 @@ int initiate(Game *pGame)
 void run(Game *pGame)
 {
 
+    LoadHighscore(pGame->HighScores);
+
     bool close_requested = false;
     SDL_Event event;
     const uint8_t *keyPressed = SDL_GetKeyboardState(NULL);
@@ -138,19 +139,23 @@ void run(Game *pGame)
 void handleInput(Game *pGame, const uint8_t *keysPressed)
 {
 
-    if ((keysPressed[SDL_SCANCODE_A] && !keysPressed[SDL_SCANCODE_LEFT]) || (!keysPressed[SDL_SCANCODE_A] && keysPressed[SDL_SCANCODE_LEFT]))
+    if (( keysPressed[SDL_SCANCODE_A] && !keysPressed[SDL_SCANCODE_LEFT]) ||
+        (!keysPressed[SDL_SCANCODE_A] &&  keysPressed[SDL_SCANCODE_LEFT]))
     {
         MoveSideways(pGame->pBoard, -1);
     }
-    if ((keysPressed[SDL_SCANCODE_D] && !keysPressed[SDL_SCANCODE_RIGHT]) || (!keysPressed[SDL_SCANCODE_D] && keysPressed[SDL_SCANCODE_RIGHT]))
+    if (( keysPressed[SDL_SCANCODE_D] && !keysPressed[SDL_SCANCODE_RIGHT]) ||
+        (!keysPressed[SDL_SCANCODE_D] &&  keysPressed[SDL_SCANCODE_RIGHT]))
     {
         MoveSideways(pGame->pBoard, +1);
     }
-    if ((keysPressed[SDL_SCANCODE_W] && !keysPressed[SDL_SCANCODE_UP]) || (!keysPressed[SDL_SCANCODE_W] && keysPressed[SDL_SCANCODE_UP]))
+    if (( keysPressed[SDL_SCANCODE_W] && !keysPressed[SDL_SCANCODE_UP]) ||
+        (!keysPressed[SDL_SCANCODE_W] &&  keysPressed[SDL_SCANCODE_UP]))
     {
         RotateClockwise(pGame->pBoard);
     }
-    if ((keysPressed[SDL_SCANCODE_S] && !keysPressed[SDL_SCANCODE_DOWN]) || (!keysPressed[SDL_SCANCODE_S] && keysPressed[SDL_SCANCODE_DOWN]))
+    if (( keysPressed[SDL_SCANCODE_S] && !keysPressed[SDL_SCANCODE_DOWN]) ||
+        (!keysPressed[SDL_SCANCODE_S] &&  keysPressed[SDL_SCANCODE_DOWN]))
     {
         RotateAntiClockwise(pGame->pBoard);
     }
@@ -168,6 +173,8 @@ void close(Game *pGame)
         SDL_DestroyWindow(pGame->pWindow);
     if (arial)
         TTF_CloseFont(arial);
+    InsertScore(pGame->HighScores,"theodor",pGame->score);
+    SaveHighscore(pGame->HighScores);
     SDL_Quit();
 }
 SDL_Rect ShowText(SDL_Renderer *pRenderer, char text[], SDL_Rect rect)
@@ -196,8 +203,8 @@ void DrawGameUI(Game *pGame)
     linesRect = ShowText(pGame->pRenderer, textBuffer, linesRect);
 
     SDL_Rect rightTextRect;
-    // SCore
-    rightTextRect.x = BOARD_X+BOARD_WIDTH + 20;
+    // Score
+    rightTextRect.x = BOARD_X + BOARD_WIDTH + 20;
     rightTextRect.y = BOARD_Y;
     sprintf(textBuffer, "Score");
     rightTextRect = ShowText(pGame->pRenderer, textBuffer, rightTextRect);
