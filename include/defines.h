@@ -23,5 +23,6 @@
 #define HIGHSCORE_SAVE_FILENAME "highscores.txt"
 #define HIGHSCORE_MAX_SAVES 10
 
+#define FONT_SIZE 25
 
 #endif
