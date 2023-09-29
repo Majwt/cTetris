@@ -2,25 +2,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "defines.h"
-#include "tetrino.h"
+#include "tetromino.h"
 
-void fillTetrinoOrientation(Tetrino *pTetrino, int orientation[4][4][4])
+void fillTetrominoOrientation(Tetromino *pTetromino, int orientation[4][4][4])
 {
-    pTetrino->orientationIndex = 0;
+    pTetromino->orientationIndex = 0;
     for (int i = 0; i < 4; i++)
     {
         for (int j = 0; j < 4; j++)
         {
             for (int k = 0; k < 4; k++)
             {
-                pTetrino->orientations[i][j][k] = orientation[i][j][k];
+                pTetromino->orientations[i][j][k] = orientation[i][j][k];
             }
         }
     }
 }
 
 // TODO: Läs in från fil istället för hårdkodat
-Tetrino CreatePiece(int n)
+Tetromino CreatePiece(int n)
 {
     // Ser dåligt ut
     int pieceOrientations[7][4][4][4] = {{{{0, 0, 0, 0},
@@ -136,8 +136,8 @@ Tetrino CreatePiece(int n)
                                            {Z, 0, 0, 0},
                                            {0, 0, 0, 0}}}};
 
-    Tetrino piece;
-    fillTetrinoOrientation(&piece, pieceOrientations[n]);
+    Tetromino piece;
+    fillTetrominoOrientation(&piece, pieceOrientations[n]);
     piece.x = 3;
     piece.y = 0;
     if (n+1 == I || n+1 == O)
@@ -151,7 +151,7 @@ Tetrino CreatePiece(int n)
     }
     return piece;
 }
-void RandomPiece(Tetrino *piece)
+void RandomPiece(Tetromino *piece)
 {
     *piece = CreatePiece(rand() % 7);
 }

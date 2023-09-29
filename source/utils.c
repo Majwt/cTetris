@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include "defines.h"
-#include "util.h"
+#include "utils.h"
 
 const SDL_Color White = {255, 255, 255, 255};
 const SDL_Color Black = {  0,   0,   0, 255};

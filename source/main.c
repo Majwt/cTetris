@@ -210,7 +210,7 @@ void run(Game *pGame)
             }
         }
 
-        if (isTetrinoOnGround(pGame->pBoard))
+        if (isTetrominoOnGround(pGame->pBoard))
         {
             NextRound(pGame->pBoard, &pGame->score, &pGame->level, &pGame->lines);
             pGame->gravity = pGame->level;
@@ -220,7 +220,7 @@ void run(Game *pGame)
             MoveDown(pGame->pBoard);
         }
 
-        DrawTetrino(pGame->pBoard);
+        DrawTetromino(pGame->pBoard);
         DrawOccupied(pGame->pBoard);
         drawGameUI(pGame);
 
@@ -295,7 +295,7 @@ void drawGameUI(Game *pGame)
     ShowNextPiece(pGame->pBoard, rightTextRect.x, rightTextRect.y + rightTextRect.h);
 
     // Level
-    rightTextRect.y += 5 * TETRINOSIZE;
+    rightTextRect.y += 5 * TETROMINOSIZE;
 
     rightTextRect = ShowText(pGame->pRenderer, White, FONT_SIZE, rightTextRect, false, "Level");
 
