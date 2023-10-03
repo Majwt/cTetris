@@ -2,7 +2,6 @@
 #include <stdbool.h>
 #include <SDL.h>
 #include <SDL_ttf.h>
-
 #include "defines.h"
 #include "utils.h"
 #include "board.h"
@@ -34,7 +33,6 @@ struct game
 };
 typedef struct game Game;
 
-
 int initiate(Game *pGame);
 void run(Game *pGame);
 void close(Game *pGame);
@@ -43,8 +41,6 @@ void initBoard(Game *pGame);
 void mainMenu(Game *pGame);
 void drawGameUI(Game *pGame);
 void gameOverView(Game *pGame);
-
-
 
 void mainMenu(Game *pGame)
 {
@@ -82,11 +78,11 @@ void mainMenu(Game *pGame)
             }
         }
     }
-    static SDL_Rect titleRect = {WINDOW_WIDTH/2,50};
+    static SDL_Rect titleRect = {WINDOW_WIDTH / 2, 50};
     ShowText(pGame->pRenderer, White, FONT_SIZE, titleRect, true, "TETRIS");
 
-    static SDL_Rect startLevelRect = {WINDOW_WIDTH/2,200};
-    ShowText(pGame->pRenderer, White, FONT_SIZE, startLevelRect, true, "STARTING LEVEL: %2d",level);
+    static SDL_Rect startLevelRect = {WINDOW_WIDTH / 2, 200};
+    ShowText(pGame->pRenderer, White, FONT_SIZE, startLevelRect, true, "STARTING LEVEL: %2d", level);
 
     SDL_SetRenderDrawColor(pGame->pRenderer, 0, 200, 0, 255);
     SDL_RenderFillRect(pGame->pRenderer, &startButtonRect);
@@ -98,7 +94,6 @@ void mainMenu(Game *pGame)
 
 int main(int argv, char **args)
 {
-
     Game g = {0};
     if (!initiate(&g))
         return 1;
@@ -133,8 +128,10 @@ int initiate(Game *pGame)
     srand(time(NULL));
     rand();
 
+
     if (!InitFont("./assets/BigBlueTermPlusNerdFont-Regular.ttf")) {
         printfd("Error: FONT\n");
+
         return 0;
     }
 
@@ -220,7 +217,6 @@ void run(Game *pGame)
         {
             MoveDown(pGame->pBoard);
         }
-
         DrawTetromino(pGame->pBoard);
         DrawOccupied(pGame->pBoard);
         drawGameUI(pGame);
@@ -246,12 +242,19 @@ void handleInput(Game *pGame, const uint8_t *keysPressed)
     if ((keysPressed[SDL_SCANCODE_W] && !keysPressed[SDL_SCANCODE_UP]) ||
         (!keysPressed[SDL_SCANCODE_W] && keysPressed[SDL_SCANCODE_UP]))
     {
-        RotateClockwise(pGame->pBoard);
+        SRSRotation(pGame->pBoard,1);
+        // RotateClockwise(pGame->pBoard);
     }
     if ((keysPressed[SDL_SCANCODE_S] && !keysPressed[SDL_SCANCODE_DOWN]) ||
         (!keysPressed[SDL_SCANCODE_S] && keysPressed[SDL_SCANCODE_DOWN]))
     {
-        RotateAntiClockwise(pGame->pBoard);
+        // SRSRotation(pGame->pBoard,-1);
+        SRSRotation(pGame->pBoard,-1);
+        // RotateAntiClockwise(pGame->pBoard);
+    }
+    if (keysPressed[SDL_SCANCODE_G]) {
+        
+        SRSRotation(pGame->pBoard,1);
     }
     if (keysPressed[SDL_SCANCODE_SPACE])
     {
@@ -271,20 +274,19 @@ void close(Game *pGame)
     SDL_Quit();
 }
 
-
 void drawGameUI(Game *pGame)
 {
     char textBuffer[100];
 
-    SDL_Rect linesRect = {BOARD_X + BOARD_WIDTH/2, BOARD_Y - 50};
+    SDL_Rect linesRect = {BOARD_X + BOARD_WIDTH / 2, BOARD_Y - 50};
     linesRect.x = BOARD_X + BOARD_WIDTH / 2;
     linesRect.y = BOARD_Y - 50;
 
     // Lines
     linesRect = ShowText(pGame->pRenderer, White, FONT_SIZE, linesRect, true, "Lines-%03d", pGame->lines);
 
-    SDL_Rect rightTextRect = {BOARD_X + BOARD_WIDTH + 20,BOARD_Y};
-    
+    SDL_Rect rightTextRect = {BOARD_X + BOARD_WIDTH + 20, BOARD_Y};
+
     // Score
     rightTextRect = ShowText(pGame->pRenderer, White, FONT_SIZE, rightTextRect, false, "Score");
     rightTextRect.y += rightTextRect.h;
@@ -302,9 +304,8 @@ void drawGameUI(Game *pGame)
 
     rightTextRect.y += rightTextRect.h;
 
-    ShowText(pGame->pRenderer, White, FONT_SIZE, rightTextRect, false, "%4d",pGame->level);
+    ShowText(pGame->pRenderer, White, FONT_SIZE, rightTextRect, false, "%4d", pGame->level);
 }
-
 
 void gameOverView(Game *pGame)
 {
@@ -328,16 +329,15 @@ void gameOverView(Game *pGame)
             }
         }
     }
-    static SDL_Rect nameRect = {WINDOW_WIDTH/2,200};
-    static SDL_Rect gameOverRect = {WINDOW_WIDTH/2,50};
-    static SDL_Rect scoreRect = {WINDOW_WIDTH/2,100};
-    static SDL_Rect nameinputRect = {WINDOW_WIDTH/2,300};
+    static SDL_Rect nameRect = {WINDOW_WIDTH / 2, 200};
+    static SDL_Rect gameOverRect = {WINDOW_WIDTH / 2, 50};
+    static SDL_Rect scoreRect = {WINDOW_WIDTH / 2, 100};
+    static SDL_Rect nameinputRect = {WINDOW_WIDTH / 2, 300};
 
-    ShowText(pGame->pRenderer, White, FONT_SIZE, gameOverRect, true,  "GAME OVER");
+    ShowText(pGame->pRenderer, White, FONT_SIZE, gameOverRect, true, "GAME OVER");
     ShowText(pGame->pRenderer, White, FONT_SIZE, nameRect, true, "Type Name:");
 
-    ShowText(pGame->pRenderer, White, FONT_SIZE, scoreRect, true, "Score: %d",pGame->score);
+    ShowText(pGame->pRenderer, White, FONT_SIZE, scoreRect, true, "Score: %d", pGame->score);
 
     ShowText(pGame->pRenderer, White, FONT_SIZE, nameRect, true, nameBuffer);
-
 }

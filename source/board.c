@@ -1,12 +1,14 @@
+#include <SDL.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <time.h>
-#include <SDL.h>
 #include "defines.h"
 #include "tetromino.h"
 #include "board.h"
 #include "special.h"
 
+#define DEBUG_BOARD 1
+#define DEBUG_PIECEID 0
 struct board
 {
     int x, y;
@@ -32,6 +34,42 @@ Board *CreateBoard(SDL_Renderer *pRenderer)
             board->occupied[i][j] = 0;
         }
     }
+
+#if DEBUG_BOARD == 1
+    printf("Custom starting board\n");
+    const int test[BOARD_ROWS][BOARD_COLUMNS]={
+        {0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,0,0,0,0},
+        {0,0,0,0,0,0,1,1,0,0},
+        {1,1,0,0,0,0,1,1,1,1},
+        {1,0,0,0,0,0,0,0,0,1},
+        {0,0,0,0,0,0,0,0,0,1},
+        {0,0,0,0,0,0,0,0,0,1},
+        {0,0,0,0,0,0,0,0,0,1},
+        {0,0,0,0,0,0,0,0,0,1},
+        {0,0,0,0,0,0,0,0,0,1},
+        {0,0,0,0,0,0,0,0,0,1},
+        {0,0,0,0,0,0,0,0,0,1},
+        {0,0,0,0,0,0,0,0,0,1},
+        };
+    for (int i = 0; i < BOARD_ROWS; i++)
+    {
+        for (int j = 0; j < BOARD_COLUMNS; j++)
+        {
+            board->occupied[i][j] = test[i][j];
+        }   
+    }
+
+#endif
+    
+    // board->occupied[]
     board->now_t = 0;
     board->prev_t = 0;
     SDL_Color Cyan = {0, 255, 255, 255};
@@ -61,6 +99,12 @@ Board *CreateBoard(SDL_Renderer *pRenderer)
     RandomPiece(&nextPiece);
     board->nextTetromino = nextPiece;
 
+    #if DEBUG_BOARD
+    printf("setting non random piece %d\n",DEBUG_PIECEID);
+    board->activeTetromino = CreatePiece(DEBUG_PIECEID);
+    board->nextTetromino = CreatePiece(DEBUG_PIECEID);
+    #endif
+
     return board;
 }
 
@@ -88,6 +132,7 @@ void DrawOccupied(Board *pBoard)
                     current -= 10;
                 }
                 SDL_Color color = pBoard->colors[current - 1];
+                
                 SDL_SetRenderDrawColor(pBoard->pRenderer, color.r, color.g, color.b, color.a);
                 SDL_RenderFillRect(pBoard->pRenderer, &rect);
             }
@@ -112,16 +157,16 @@ void DrawOccupied(Board *pBoard)
 /// @param pTetromino
 /// @param pBoard
 /// @return 1 if collision is detected, else 0
-int TetrominoCollisionCheck(Board *pBoard)
+int TetrominoCollisionCheck(Board *pBoard,int srsX,int srsY,int orientation)
 {
-    const int orientation = pBoard->activeTetromino.orientationIndex;
+
     for (int y = 0; y < 4; y++)
     {
         for (int x = 0; x < 4; x++)
         {
             int activeTetrominoBlockValue = pBoard->activeTetromino.orientations[orientation][y][x];
-            int boardBlockX = x + pBoard->activeTetromino.x;
-            int boardBlockY = y + pBoard->activeTetromino.y;
+            int boardBlockX = pBoard->activeTetromino.x + x + srsX;
+            int boardBlockY = pBoard->activeTetromino.y + y - srsY;
             if (boardBlockY < 0 || boardBlockX < 0 || boardBlockX >= BOARD_COLUMNS || boardBlockY >= BOARD_ROWS)
             {
                 if (activeTetrominoBlockValue > 0)
@@ -156,7 +201,7 @@ void DrawTetromino(Board *pBoard)
             }
         }
     }
-    bool hit = TetrominoCollisionCheck(pBoard);
+    bool hit = TetrominoCollisionCheck(pBoard,0,0,pBoard->activeTetromino.orientationIndex);
     for (int y = 0; y < 4 && !hit; y++)
     {
         for (int x = 0; x < 4 && !hit; x++)
@@ -174,12 +219,14 @@ void MoveSideways(Board *pBoard, int dx)
 {
     pBoard->activeTetromino.x += dx;
 
-    printfd("MOVE %d: ", dx);
 
-    if (TetrominoCollisionCheck(pBoard))
+    printf("MOVE %d: ", dx);
+
+    if (TetrominoCollisionCheck(pBoard,0,0,pBoard->activeTetromino.orientationIndex))
     {
 
-        printfd("REVERT");
+        printf("REVERT");
+
 
         pBoard->activeTetromino.x += -dx;
     }
@@ -189,18 +236,51 @@ void MoveSideways(Board *pBoard, int dx)
         pBoard->onGround = false;
     }
 
-    printfd("\n");
 
+    printfd("\n");
 }
 void MoveDown(Board *pBoard)
 {
     pBoard->activeTetromino.y += 1;
-    bool onGround = TetrominoCollisionCheck(pBoard);
+    bool onGround = TetrominoCollisionCheck(pBoard,0,0,pBoard->activeTetromino.orientationIndex);
     if (onGround)
     {
         pBoard->activeTetromino.y += -1;
         pBoard->onGround = true;
     }
+}
+/// @brief SRS Rotation
+/// @param pBoard 
+/// @param direction ±1
+/// @return 0 if failed, 1 if success
+bool SRSRotation(Board *pBoard, int direction)
+{
+    int oldOrientation = pBoard->activeTetromino.orientationIndex;
+    int newOrientation = ((pBoard->activeTetromino.orientationIndex+direction)%4 > -1) ? (pBoard->activeTetromino.orientationIndex+direction)%4 : (pBoard->activeTetromino.orientationIndex+direction)%4+4;
+    const int srsIndex = getSRSindex(pBoard->activeTetromino.orientationIndex,newOrientation);
+    if (srsIndex == -1) {
+        printf("ERROR SRS");
+        return true;
+    }
+    printf("srsIndex: %d\n",srsIndex);
+    for (int i = 0; i < 5; i++)
+    {
+        int srsX = pBoard->activeTetromino.srsTests[srsIndex][i][0];
+        int srsY = pBoard->activeTetromino.srsTests[srsIndex][i][1];
+        if (TetrominoCollisionCheck(pBoard,srsX,srsY,newOrientation) == 0) {
+            pBoard->activeTetromino.x += srsX;
+            pBoard->activeTetromino.y -= srsY;
+            pBoard->activeTetromino.orientationIndex = newOrientation;
+            printf("succes test index: %d\n",i);
+            pBoard->onGround = false;
+            pBoard->onGroundTime = 0;
+            return true;
+        }
+    }
+
+    // pBoard->activeTetromino.orientationIndex = pBoard->activeTetromino.orientationIndex;
+    printf("fail LAST: %d\n",pBoard->activeTetromino.orientationIndex);
+    return false;
 }
 
 void RotateClockwise(Board *pBoard)
@@ -208,40 +288,43 @@ void RotateClockwise(Board *pBoard)
     int before = pBoard->activeTetromino.orientationIndex;
     pBoard->activeTetromino.orientationIndex = (pBoard->activeTetromino.orientationIndex + 1) % 4;
 
-    printfd("ROTATE CLOCKWISE: %d->%d ", before, pBoard->activeTetromino.orientationIndex);
 
-    if (TetrominoCollisionCheck(pBoard))
+    printf("ROTATE CLOCKWISE: %d->%d ", before, pBoard->activeTetromino.orientationIndex);
+
+    if (TetrominoCollisionCheck(pBoard,0,0,pBoard->activeTetromino.orientationIndex))
     {
         pBoard->activeTetromino.orientationIndex = (pBoard->activeTetromino.orientationIndex - 1 > -1) ? pBoard->activeTetromino.orientationIndex - 1 : 3;
 
-        printfd("REVERT %d", pBoard->activeTetromino.orientationIndex);
-
+        printf("REVERT %d", pBoard->activeTetromino.orientationIndex);
     }
 
-    printfd("\n");
+    printf("\n");
 
 }
 void RotateAntiClockwise(Board *pBoard)
 {
 
+
     printfd("ROTATE ANTI CLOCKWISE: ");
 
     pBoard->activeTetromino.orientationIndex = (pBoard->activeTetromino.orientationIndex - 1 > -1) ? pBoard->activeTetromino.orientationIndex - 1 : 3;
-    if (TetrominoCollisionCheck(pBoard))
+    if (TetrominoCollisionCheck(pBoard,0,0,pBoard->activeTetromino.orientationIndex))
     {
+
 
         printfd("REVERT");
 
+
         pBoard->activeTetromino.orientationIndex = (pBoard->activeTetromino.orientationIndex + 1) % 4;
     }
+
 
     printfd("\n");
 
 }
 void ConvertToStatic(Board *pBoard)
 {
-    pBoard->activeTetromino = pBoard->nextTetromino;
-    RandomPiece(&pBoard->nextTetromino);
+    
     for (int y = 0; y < BOARD_ROWS; y++)
     {
         for (int x = 0; x < BOARD_COLUMNS; x++)
@@ -331,12 +414,18 @@ bool isTetrominoOnGround(Board *pBoard)
 void NextRound(Board *pBoard, int *pScore, int *pLevel, int *pLines)
 {
     ConvertToStatic(pBoard);
+    pBoard->activeTetromino = pBoard->nextTetromino;
+    RandomPiece(&pBoard->nextTetromino);
+    #if DEBUG_BOARD
+    pBoard->nextTetromino = CreatePiece(DEBUG_PIECEID);
+    #endif
     int linesCleared = ClearCompleteRows(pBoard);
     *pScore += AddPoints(*pLevel, linesCleared);
     *pLines += linesCleared;
     if (*pLines > 1 && *pLines % 5 == 0)
     {
         *pLevel += 1;
+
 
         printfd("Level UP: ");
         printfd("%d\n", *pLevel);
@@ -359,7 +448,7 @@ void UpdateOnGroundTime(Board *pBoard)
 }
 bool GameOverCheck(Board *pBoard)
 {
-    return pBoard->activeTetromino.y < 1 && TetrominoCollisionCheck(pBoard);
+    return pBoard->activeTetromino.y < 1 && TetrominoCollisionCheck(pBoard,0,0,pBoard->activeTetromino.orientationIndex);
 }
 int AddPoints(int level, int lines)
 {
