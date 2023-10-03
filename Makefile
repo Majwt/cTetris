@@ -25,3 +25,5 @@ utils.o: $(SRCDIR)/utils.c $(INCDIR)/utils.h
 clean:
 	rm *.out
 	rm *.o
+
+freshbuild: clean Tetris

@@ -1,0 +1,14 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+           {
+               "label": "Debug Build",
+               "type": "shell",
+               "command": "make freshbuild",
+               "presentation": {
+                   "reveal":"always"
+               },
+               "problemMatcher": "$msCompile"
+           },
+   ]
+   }
