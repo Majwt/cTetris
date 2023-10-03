@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "defines.h"
 #include "tetromino.h"
+#include "special.h"
 
 void changeSignSRS(int in[5][2], int out[5][2])
 {

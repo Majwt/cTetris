@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "board.h"
 #include "highscore.h"
+#include "special.h"
 
 #define FPS 30
 
@@ -57,7 +58,7 @@ void mainMenu(Game *pGame)
     {
         if (event.button.state == SDL_PRESSED && PointRectCollision(mouseX, mouseY, startButtonRect))
         {
-            printf("PRESSED\n");
+            printfd("PRESSED\n");
             pGame->level = level;
             pGame->state = PLAY;
         }
@@ -127,28 +128,29 @@ int initiate(Game *pGame)
     srand(time(NULL));
     rand();
 
-    if (!InitFont("./assets/BigBlueTermPlusNerdFont-Regular.ttf"))
-    {
-        printf("Error: FONT\n");
+
+    if (!InitFont("./assets/BigBlueTermPlusNerdFont-Regular.ttf")) {
+        printfd("Error: FONT\n");
+
         return 0;
     }
 
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
     {
-        printf("Error: %s\n", SDL_GetError());
+        printfd("Error: %s\n", SDL_GetError());
         return 0;
     }
     pGame->pWindow = SDL_CreateWindow("Tetris", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
     if (!pGame->pWindow)
     {
-        printf("Error: %s\n", SDL_GetError());
+        printfd("Error: %s\n", SDL_GetError());
         close(pGame);
         return 0;
     }
     pGame->pRenderer = SDL_CreateRenderer(pGame->pWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!pGame->pRenderer)
     {
-        printf("Error: %s\n", SDL_GetError());
+        printfd("Error: %s\n", SDL_GetError());
         close(pGame);
         return 0;
     }

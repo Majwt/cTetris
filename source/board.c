@@ -5,7 +5,7 @@
 #include "defines.h"
 #include "tetromino.h"
 #include "board.h"
-
+#include "special.h"
 
 #define DEBUG_BOARD 1
 #define DEBUG_PIECEID 0
@@ -219,12 +219,14 @@ void MoveSideways(Board *pBoard, int dx)
 {
     pBoard->activeTetromino.x += dx;
 
+
     printf("MOVE %d: ", dx);
 
     if (TetrominoCollisionCheck(pBoard,0,0,pBoard->activeTetromino.orientationIndex))
     {
 
         printf("REVERT");
+
 
         pBoard->activeTetromino.x += -dx;
     }
@@ -234,7 +236,8 @@ void MoveSideways(Board *pBoard, int dx)
         pBoard->onGround = false;
     }
 
-    printf("\n");
+
+    printfd("\n");
 }
 void MoveDown(Board *pBoard)
 {
@@ -285,6 +288,7 @@ void RotateClockwise(Board *pBoard)
     int before = pBoard->activeTetromino.orientationIndex;
     pBoard->activeTetromino.orientationIndex = (pBoard->activeTetromino.orientationIndex + 1) % 4;
 
+
     printf("ROTATE CLOCKWISE: %d->%d ", before, pBoard->activeTetromino.orientationIndex);
 
     if (TetrominoCollisionCheck(pBoard,0,0,pBoard->activeTetromino.orientationIndex))
@@ -295,22 +299,28 @@ void RotateClockwise(Board *pBoard)
     }
 
     printf("\n");
+
 }
 void RotateAntiClockwise(Board *pBoard)
 {
 
-    printf("ROTATE ANTI CLOCKWISE: ");
+
+    printfd("ROTATE ANTI CLOCKWISE: ");
 
     pBoard->activeTetromino.orientationIndex = (pBoard->activeTetromino.orientationIndex - 1 > -1) ? pBoard->activeTetromino.orientationIndex - 1 : 3;
     if (TetrominoCollisionCheck(pBoard,0,0,pBoard->activeTetromino.orientationIndex))
     {
 
-        printf("REVERT");
+
+        printfd("REVERT");
+
 
         pBoard->activeTetromino.orientationIndex = (pBoard->activeTetromino.orientationIndex + 1) % 4;
     }
 
-    printf("\n");
+
+    printfd("\n");
+
 }
 void ConvertToStatic(Board *pBoard)
 {
@@ -416,8 +426,10 @@ void NextRound(Board *pBoard, int *pScore, int *pLevel, int *pLines)
     {
         *pLevel += 1;
 
-        printf("Level UP: ");
-        printf("%d\n", *pLevel);
+
+        printfd("Level UP: ");
+        printfd("%d\n", *pLevel);
+
     }
     pBoard->onGround = false;
 }
