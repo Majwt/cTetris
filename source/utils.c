@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include "defines.h"
+#include "special.h"
 #include "utils.h"
 
 const SDL_Color White = {255, 255, 255, 255};
@@ -10,26 +11,19 @@ const SDL_Color Black = {  0,   0,   0, 255};
 TTF_Font* font;
 int InitFont(const char* path_to_font) {
     if (TTF_Init() == -1) {
-        printf("FONT ERROR\n");
+        printfd("FONT ERROR\n");
         return 0;
     }
     font = TTF_OpenFont(path_to_font, FONT_SIZE);
     if (!font)
     {
-        printf("COULD NOT LOAD FONT\n");
+        printfd("COULD NOT LOAD FONT\n");
         return 0;
     }
     return 1;
 }
 
-void test(const char* format, ...) {
-    va_list ap;
-    va_start(ap,format);
-    
-    char buffer[100];
-    vsprintf(buffer,format,ap);
-    printf(buffer);
-}
+
 
 SDL_Rect ShowText(SDL_Renderer *pRenderer, SDL_Color color, int fontsize, SDL_Rect rect, bool centered,const char* text, ...)
 {

@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include "highscore.h"
 #include "defines.h"
+#include "special.h"
 
 Pair createPair(char name[], int score)
 {
@@ -20,7 +21,7 @@ void SaveHighscore(Pair highscores[])
     FILE *ptr = fopen(HIGHSCORE_SAVE_FILENAME, "w");
     if (ptr == NULL)
     {
-        printf("Error!");
+        printfd("Error!");
         exit(1);
     }
     fprintf(ptr,"scores:\n");
@@ -37,7 +38,7 @@ void LoadHighscore(Pair highscores[])
     FILE *ptr = fopen(HIGHSCORE_SAVE_FILENAME, "r");
     if (ptr == NULL)
     {
-        printf("CREATING HIGHSCORE FILE\n");
+        printfd("CREATING HIGHSCORE FILE\n");
         for (int i = 0; i < HIGHSCORE_MAX_SAVES; i++)
         {
             highscores[i] = createPair("nan",0);
@@ -53,7 +54,7 @@ void LoadHighscore(Pair highscores[])
     char test[10];
     fscanf(ptr,"%s\n",&test);
     if (strcmp(test,"scores:")) {
-        printf("FILE ERROR\n");
+        printfd("FILE ERROR\n");
         exit(1);
     }
     while (fscanf(ptr, "%s : %d", name, &readScore) == 2)
@@ -111,14 +112,14 @@ void swapPair(Pair *A,Pair *B)
 }
 
 void printPairs(Pair highscores[]) {
-    printf("print\n");
+    printfd("print\n");
     for (int i = 0; i < HIGHSCORE_MAX_SAVES; i++)
     {
-        printf("%s : %d\n",highscores[i].name,highscores[i].score);
+        printfd("%s : %d\n",highscores[i].name,highscores[i].score);
     }
-    printf("\n");
+    printfd("\n");
     
 }
 void printPair(Pair score) {
-    printf("name: %s, score: %d\n",score.name,score.score);
+    printfd("name: %s, score: %d\n",score.name,score.score);
 }

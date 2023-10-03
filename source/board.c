@@ -5,7 +5,7 @@
 #include "defines.h"
 #include "tetromino.h"
 #include "board.h"
-
+#include "special.h"
 
 struct board
 {
@@ -173,14 +173,14 @@ void DrawTetromino(Board *pBoard)
 void MoveSideways(Board *pBoard, int dx)
 {
     pBoard->activeTetromino.x += dx;
-#if DEBUG
-    printf("MOVE %d: ", dx);
-#endif
+
+    printfd("MOVE %d: ", dx);
+
     if (TetrominoCollisionCheck(pBoard))
     {
-#if DEBUG
-        printf("REVERT");
-#endif
+
+        printfd("REVERT");
+
         pBoard->activeTetromino.x += -dx;
     }
     else
@@ -188,9 +188,9 @@ void MoveSideways(Board *pBoard, int dx)
         pBoard->onGroundTime = 0;
         pBoard->onGround = false;
     }
-#if DEBUG
-    printf("\n");
-#endif
+
+    printfd("\n");
+
 }
 void MoveDown(Board *pBoard)
 {
@@ -207,36 +207,36 @@ void RotateClockwise(Board *pBoard)
 {
     int before = pBoard->activeTetromino.orientationIndex;
     pBoard->activeTetromino.orientationIndex = (pBoard->activeTetromino.orientationIndex + 1) % 4;
-#if DEBUG
-    printf("ROTATE CLOCKWISE: %d->%d ", before, pBoard->activeTetromino.orientationIndex);
-#endif
+
+    printfd("ROTATE CLOCKWISE: %d->%d ", before, pBoard->activeTetromino.orientationIndex);
+
     if (TetrominoCollisionCheck(pBoard))
     {
         pBoard->activeTetromino.orientationIndex = (pBoard->activeTetromino.orientationIndex - 1 > -1) ? pBoard->activeTetromino.orientationIndex - 1 : 3;
-#if DEBUG
-        printf("REVERT %d", pBoard->activeTetromino.orientationIndex);
-#endif
+
+        printfd("REVERT %d", pBoard->activeTetromino.orientationIndex);
+
     }
-#if DEBUG
-    printf("\n");
-#endif
+
+    printfd("\n");
+
 }
 void RotateAntiClockwise(Board *pBoard)
 {
-#if DEBUG
-    printf("ROTATE ANTI CLOCKWISE: ");
-#endif
+
+    printfd("ROTATE ANTI CLOCKWISE: ");
+
     pBoard->activeTetromino.orientationIndex = (pBoard->activeTetromino.orientationIndex - 1 > -1) ? pBoard->activeTetromino.orientationIndex - 1 : 3;
     if (TetrominoCollisionCheck(pBoard))
     {
-#if DEBUG
-        printf("REVERT");
-#endif
+
+        printfd("REVERT");
+
         pBoard->activeTetromino.orientationIndex = (pBoard->activeTetromino.orientationIndex + 1) % 4;
     }
-#if DEBUG
-    printf("\n");
-#endif
+
+    printfd("\n");
+
 }
 void ConvertToStatic(Board *pBoard)
 {
@@ -337,10 +337,10 @@ void NextRound(Board *pBoard, int *pScore, int *pLevel, int *pLines)
     if (*pLines > 1 && *pLines % 5 == 0)
     {
         *pLevel += 1;
-#if DEBUG
-        printf("Level UP: ");
-        printf("%d\n", *pLevel);
-#endif
+
+        printfd("Level UP: ");
+        printfd("%d\n", *pLevel);
+
     }
     pBoard->onGround = false;
 }

@@ -4,7 +4,7 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/opt/homebrew/include/SDL2/**"
+                "/opt/homebrew/include/SDL2"
             ],
             "compilerPath": "/opt/homebrew/bin/gcc-13",
             "cStandard": "gnu17",

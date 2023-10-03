@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "defines.h"
 #include "tetromino.h"
+#include "special.h"
 
 void fillTetrominoOrientation(Tetromino *pTetromino, int orientation[4][4][4])
 {

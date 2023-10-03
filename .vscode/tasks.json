@@ -4,7 +4,7 @@
            {
                "label": "Debug Build",
                "type": "shell",
-               "command": "make freshbuild",
+               "command": "make cleanbuild",
                "presentation": {
                    "reveal":"always"
                },
