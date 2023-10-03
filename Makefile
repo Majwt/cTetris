@@ -1,7 +1,7 @@
 # Makefile for Mac
 SRCDIR=./source
 CC=gcc-13
-INCLUDE = /opt/homebrew/include/SDL2
+INCLUDE = `sdl2-config --prefix`/include/SDL2
 INCDIR=./include
 
 CFLAGS = -g -I$(INCLUDE) -I$(INCDIR) -c 
