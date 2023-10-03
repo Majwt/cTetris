@@ -2,6 +2,7 @@
 #define defines_h
 
 #define DEBUG 1
+#define USE_SRS 1
 #define DRAW_GRID 1
 
 #define WINDOW_WIDTH 500

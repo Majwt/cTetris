@@ -259,10 +259,10 @@ bool SRSRotation(Board *pBoard, int direction)
     int newOrientation = ((pBoard->activeTetromino.orientationIndex+direction)%4 > -1) ? (pBoard->activeTetromino.orientationIndex+direction)%4 : (pBoard->activeTetromino.orientationIndex+direction)%4+4;
     const int srsIndex = getSRSindex(pBoard->activeTetromino.orientationIndex,newOrientation);
     if (srsIndex == -1) {
-        printf("ERROR SRS");
+        printfd("ERROR SRS");
         return true;
     }
-    printf("srsIndex: %d\n",srsIndex);
+    printfd("srsIndex: %d\n",srsIndex);
     for (int i = 0; i < 5; i++)
     {
         int srsX = pBoard->activeTetromino.srsTests[srsIndex][i][0];
@@ -271,7 +271,7 @@ bool SRSRotation(Board *pBoard, int direction)
             pBoard->activeTetromino.x += srsX;
             pBoard->activeTetromino.y -= srsY;
             pBoard->activeTetromino.orientationIndex = newOrientation;
-            printf("succes test index: %d\n",i);
+            printfd("succes test index: %d\n",i);
             pBoard->onGround = false;
             pBoard->onGroundTime = 0;
             return true;
@@ -279,7 +279,7 @@ bool SRSRotation(Board *pBoard, int direction)
     }
 
     // pBoard->activeTetromino.orientationIndex = pBoard->activeTetromino.orientationIndex;
-    printf("fail LAST: %d\n",pBoard->activeTetromino.orientationIndex);
+    printfd("fail LAST: %d\n",pBoard->activeTetromino.orientationIndex);
     return false;
 }
 
@@ -289,37 +289,28 @@ void RotateClockwise(Board *pBoard)
     pBoard->activeTetromino.orientationIndex = (pBoard->activeTetromino.orientationIndex + 1) % 4;
 
 
-    printf("ROTATE CLOCKWISE: %d->%d ", before, pBoard->activeTetromino.orientationIndex);
 
     if (TetrominoCollisionCheck(pBoard,0,0,pBoard->activeTetromino.orientationIndex))
     {
         pBoard->activeTetromino.orientationIndex = (pBoard->activeTetromino.orientationIndex - 1 > -1) ? pBoard->activeTetromino.orientationIndex - 1 : 3;
 
-        printf("REVERT %d", pBoard->activeTetromino.orientationIndex);
     }
 
-    printf("\n");
 
 }
 void RotateAntiClockwise(Board *pBoard)
 {
 
 
-    printfd("ROTATE ANTI CLOCKWISE: ");
-
     pBoard->activeTetromino.orientationIndex = (pBoard->activeTetromino.orientationIndex - 1 > -1) ? pBoard->activeTetromino.orientationIndex - 1 : 3;
     if (TetrominoCollisionCheck(pBoard,0,0,pBoard->activeTetromino.orientationIndex))
     {
 
 
-        printfd("REVERT");
-
 
         pBoard->activeTetromino.orientationIndex = (pBoard->activeTetromino.orientationIndex + 1) % 4;
     }
 
-
-    printfd("\n");
 
 }
 void ConvertToStatic(Board *pBoard)

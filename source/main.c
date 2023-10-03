@@ -247,19 +247,20 @@ void handleInput(Game *pGame, const uint8_t *keysPressed)
     if ((keysPressed[SDL_SCANCODE_W] && !keysPressed[SDL_SCANCODE_UP]) ||
         (!keysPressed[SDL_SCANCODE_W] && keysPressed[SDL_SCANCODE_UP]))
     {
+        #if USE_SRS
         SRSRotation(pGame->pBoard,1);
-        // RotateClockwise(pGame->pBoard);
+        #else
+        RotateClockwise(pGame->pBoard);
+        #endif
     }
     if ((keysPressed[SDL_SCANCODE_S] && !keysPressed[SDL_SCANCODE_DOWN]) ||
         (!keysPressed[SDL_SCANCODE_S] && keysPressed[SDL_SCANCODE_DOWN]))
     {
-        // SRSRotation(pGame->pBoard,-1);
+        #if USE_SRS
         SRSRotation(pGame->pBoard,-1);
-        // RotateAntiClockwise(pGame->pBoard);
-    }
-    if (keysPressed[SDL_SCANCODE_G]) {
-        
-        SRSRotation(pGame->pBoard,1);
+        #else
+        RotateAntiClockwise(pGame->pBoard);
+        #endif
     }
     if (keysPressed[SDL_SCANCODE_SPACE])
     {
