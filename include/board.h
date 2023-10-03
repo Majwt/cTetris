@@ -6,7 +6,7 @@ typedef struct board Board;
 Board *CreateBoard(SDL_Renderer *pRenderer);
 void DrawOccupied(Board *board);
 void DrawTetromino(Board *pBoard);
-int TetrominoCollisionCheck(Board *pBoard);
+int TetrominoCollisionCheck(Board *pBoard,int srsX,int srsY, int orientation);
 
 void UpdateOnGroundTime(Board *pBoard);
 
@@ -14,6 +14,7 @@ void MoveSideways(Board *pBoard, int dx);
 void MoveDown(Board *pBoard);
 void RotateClockwise(Board *pBoard);
 void RotateAntiClockwise(Board *pBoard);
+bool SRSRotation(Board *pBoard, int direction);
 
 void ConvertToStatic(Board *pBoard);
 void NextRound(Board *pBoard, int *score, int *level, int *lines);
