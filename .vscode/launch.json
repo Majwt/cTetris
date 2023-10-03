@@ -1,23 +1,24 @@
 {
-    "configurations": [
-    {
-        "name": "Debug Launch",
-        "type": "cppdbg",
-        "request": "launch",
-        "program": "${workspaceFolder}/Tetris.out",
-        "args": [],
-        "stopAtEntry": false,
-        "cwd": "${workspaceFolder}",
-        "environment": [],
-        "externalConsole": false,
-        "osx": {
-            "MIMode": "lldb",
-        },
-        "linux": {
-            "MIMode": "gdb",
-            "miDebuggerPath": "/usr/bin/gdb"
-        }
+	"configurations": [
+	{
+		"name": "Debug Launch",
+		"type": "cppdbg",
+		"request": "launch",
+		"program": "${workspaceFolder}/Tetris.out",
+		"args": [],
+		"stopAtEntry": false,
+		"cwd": "${workspaceFolder}",
+		"environment": [],
+		"externalConsole": false,
+		"preLaunchTask": "Debug Build",
+		"osx": {
+			"MIMode": "lldb",
+		},
+		"linux": {
+			"MIMode": "gdb",
+			"miDebuggerPath": "/usr/bin/gdb"
+		}
 
-    }
-    ]
+	}
+	]
 }

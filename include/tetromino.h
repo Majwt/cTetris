@@ -3,18 +3,18 @@
 typedef struct tetromino Tetromino;
 
 typedef struct srs_pair {
-    int y,x;
+	int y,x;
 } srsPair;
 enum pieceType {I=1,O,T,J,L,S,Z};
 struct tetromino
 {
-    // top left
-    int x;
-    int y;
-    int orientationIndex,oldorientationIndex;
-    int width;
-    int orientations[4][4][4];
-    int srsTests[8][5][2];
+	// top left
+	int x;
+	int y;
+	int orientationIndex,oldorientationIndex;
+	int width;
+	int orientations[4][4][4];
+	int srsTests[8][5][2];
 };
 
 Tetromino CreatePiece(int n);

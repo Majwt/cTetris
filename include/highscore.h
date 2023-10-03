@@ -2,8 +2,8 @@
 #define highscore_h
 struct pairType
 {
-    int score;
-    char name[10];
+	int score;
+	char name[10];
 };
 typedef struct pairType Pair;
 
