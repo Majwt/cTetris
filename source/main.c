@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <time.h>
 #include <SDL.h>
 #include <SDL_ttf.h>
+
+
 #include "defines.h"
 #include "utils.h"
 #include "board.h"
@@ -33,9 +36,11 @@ struct game
 };
 typedef struct game Game;
 
-int initiate(Game *pGame);
-void run(Game *pGame);
-void close(Game *pGame);
+
+int initGame(Game *pGame);
+void runGame(Game *pGame);
+void closeGame(Game *pGame);
+
 void handleInput(Game *pGame, const uint8_t *keysPressed);
 void initBoard(Game *pGame);
 void mainMenu(Game *pGame);
@@ -95,7 +100,7 @@ void mainMenu(Game *pGame)
 int main(int argv, char **args)
 {
     Game g = {0};
-    if (!initiate(&g))
+    if (!initGame(&g))
         return 1;
     while (g.state != QUIT)
     {
@@ -104,7 +109,7 @@ int main(int argv, char **args)
         if (g.state == PLAY)
         {
             initBoard(&g);
-            run(&g);
+            runGame(&g);
         }
         else if (g.state == GAMEOVER)
         {
@@ -118,12 +123,12 @@ int main(int argv, char **args)
         SDL_Delay(1000 / FPS);
     }
 
-    close(&g);
+    closeGame(&g);
 
     return 0;
 }
 
-int initiate(Game *pGame)
+int initGame(Game *pGame)
 {
     srand(time(NULL));
     rand();
@@ -144,14 +149,14 @@ int initiate(Game *pGame)
     if (!pGame->pWindow)
     {
         printfd("Error: %s\n", SDL_GetError());
-        close(pGame);
+        closeGame(pGame);
         return 0;
     }
     pGame->pRenderer = SDL_CreateRenderer(pGame->pWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!pGame->pRenderer)
     {
         printfd("Error: %s\n", SDL_GetError());
-        close(pGame);
+        closeGame(pGame);
         return 0;
     }
     initBoard(pGame);
@@ -171,7 +176,7 @@ void initBoard(Game *pGame)
     pGame->gravity = pGame->level;
 }
 
-void run(Game *pGame)
+void runGame(Game *pGame)
 {
 
     bool close_requested = false;
@@ -262,7 +267,7 @@ void handleInput(Game *pGame, const uint8_t *keysPressed)
     }
 }
 
-void close(Game *pGame)
+void closeGame(Game *pGame)
 {
     if (pGame->pRenderer)
         SDL_DestroyRenderer(pGame->pRenderer);

@@ -1,4 +1,4 @@
 *.o
 *.out
-
+.vscode/settings.json
 highscores.txt

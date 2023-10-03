@@ -52,7 +52,7 @@ void LoadHighscore(Pair highscores[])
     int readScore = 0;
     int i = 0;
     char test[10];
-    fscanf(ptr,"%s\n",&test);
+    fscanf(ptr,"%s\n",test);
     if (strcmp(test,"scores:")) {
         printfd("FILE ERROR\n");
         exit(1);
