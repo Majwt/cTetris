@@ -6,15 +6,10 @@
 
 void printfd(const char* format, ...) {
     #if DEBUG
+    printf("[DEBUG] ");
     va_list ap;
     va_start(ap,format);
-    char buffer[1000];
-    const char debug[] = "[DEBUG] ";
-    vsprintf(buffer,format,ap);
-    // strcat(printbuffer,buffer);
-    // strcat(printbuffer,"\n");
+    vprintf(format,ap);
     va_end(ap);
-    printf(debug);
-    printf(buffer);
     #endif
 }

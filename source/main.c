@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <SDL.h>
 #include <SDL_ttf.h>
-
+#include <time.h>
 #include "defines.h"
 #include "utils.h"
 #include "board.h"
