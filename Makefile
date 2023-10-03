@@ -1,7 +1,7 @@
 # Makefile for Mac
 SRCDIR=./source
 CC=gcc-13
-INCLUDE = /opt/homebrew/include/SDL2
+INCLUDE = `sdl2-config --prefix`/include/SDL2
 INCDIR=./include
 
 CFLAGS = -g -I$(INCLUDE) -I$(INCDIR) -c 
@@ -13,7 +13,7 @@ Tetris: main.o tetromino.o board.o highscore.o utils.o
 main.o: $(SRCDIR)/main.c
 	$(CC) $(CFLAGS) $(SRCDIR)/main.c
 
-tetromino.o: $(SRCDIR)/tetromino.c $(INCDIR)/tetromino.h  
+tetromino.o: $(SRCDIR)/tetromino.c $(INCDIR)/tetromino.h
 	$(CC) $(CFLAGS) $(SRCDIR)/tetromino.c
 board.o: $(SRCDIR)/board.c $(INCDIR)/board.h $(INCDIR)/tetromino.h  
 	$(CC) $(CFLAGS) $(SRCDIR)/board.c
