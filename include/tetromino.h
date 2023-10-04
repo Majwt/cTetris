@@ -11,7 +11,7 @@ struct tetromino
 	// top left
 	int x;
 	int y;
-	int orientationIndex,oldorientationIndex;
+	int orientationIndex;
 	int width;
 	int orientations[4][4][4];
 	int srsTests[8][5][2];

@@ -218,10 +218,12 @@ void runGame(Game *pGame)
 			NextRound(pGame->pBoard, &pGame->score, &pGame->level, &pGame->lines);
 			pGame->gravity = pGame->level;
 		}
+#if DEBUG == 0
 		else if (frameCounter % (FPS - ((pGame->gravity >= FPS) ? FPS - 1 : pGame->gravity)) == 0)
 		{
 			MoveDown(pGame->pBoard);
 		}
+#endif
 		DrawTetromino(pGame->pBoard);
 		DrawOccupied(pGame->pBoard);
 		drawGameUI(pGame);
@@ -261,6 +263,9 @@ void handleInput(Game *pGame, const uint8_t *keysPressed)
 		#else
 		RotateAntiClockwise(pGame->pBoard);
 		#endif
+	}
+	if (keysPressed[SDL_SCANCODE_K]) {
+		MoveDown(pGame->pBoard);
 	}
 	if (keysPressed[SDL_SCANCODE_SPACE])
 	{
