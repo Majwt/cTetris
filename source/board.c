@@ -7,8 +7,7 @@
 #include "board.h"
 #include "special.h"
 
-#define DEBUG_BOARD 1
-#define DEBUG_PIECEID 0
+
 struct board
 {
 	int x, y;
@@ -168,7 +167,7 @@ void DrawOccupied(Board *pBoard)
 /// @param pTetromino
 /// @param pBoard
 /// @return 1 if collision is detected, else 0
-int TetrominoCollisionCheck(Board *pBoard, int srsX, int srsY, int orientation)
+int TetrominoCollisionCheck(Board *pBoard, int offsetX, int offsetY, int orientation)
 {
 
 	for (int y = 0; y < 4; y++)
@@ -176,8 +175,8 @@ int TetrominoCollisionCheck(Board *pBoard, int srsX, int srsY, int orientation)
 		for (int x = 0; x < 4; x++)
 		{
 			int activeTetrominoBlockValue = pBoard->activeTetromino.orientations[orientation][y][x];
-			int boardBlockX = pBoard->activeTetromino.x + x + srsX;
-			int boardBlockY = pBoard->activeTetromino.y + y + srsY;
+			int boardBlockX = pBoard->activeTetromino.x + x + offsetX;
+			int boardBlockY = pBoard->activeTetromino.y + y + offsetY;
 			if (boardBlockY < 0 || boardBlockX < 0 || boardBlockX >= BOARD_COLUMNS || boardBlockY >= BOARD_ROWS)
 			{
 				if (activeTetrominoBlockValue > 0)
@@ -212,10 +211,10 @@ void DrawTetromino(Board *pBoard)
 			}
 		}
 	}
-	bool hit = TetrominoCollisionCheck(pBoard, 0, 0, pBoard->activeTetromino.orientationIndex);
-	for (int y = 0; y < 4 && !hit; y++)
+	// bool hit = TetrominoCollisionCheck(pBoard, 0, 0, pBoard->activeTetromino.orientationIndex);
+	for (int y = 0; y < 4; y++)
 	{
-		for (int x = 0; x < 4 && !hit; x++)
+		for (int x = 0; x < 4; x++)
 		{
 			int activeTetrominoBlockValue = pBoard->activeTetromino.orientations[pBoard->activeTetromino.orientationIndex][y][x];
 
@@ -226,53 +225,70 @@ void DrawTetromino(Board *pBoard)
 		}
 	}
 }
-void MoveSideways(Board *pBoard, int dx)
-{
-	pBoard->activeTetromino.x += dx;
-
-	printf("MOVE %d: ", dx);
-
-	if (TetrominoCollisionCheck(pBoard, 0, 0, pBoard->activeTetromino.orientationIndex))
+void Move(Board *pBoard, int dx,int dy) {
+	if (!TetrominoCollisionCheck(pBoard, dx, dy, pBoard->activeTetromino.orientationIndex))
 	{
+		if (dx) {
+		printfd("MOVE %d: \n", dx);
 
-		printf("REVERT");
-
-		pBoard->activeTetromino.x += -dx;
-	}
-	else
-	{
+		}
+		pBoard->activeTetromino.x += dx;
+		pBoard->activeTetromino.y += dy;
 		pBoard->onGroundTime = 0;
 		pBoard->onGround = false;
 	}
+	else if (dx)
+	{
+		printfd("MOVE %d: REVERT\n", dx);
+	}
+}
+void MoveSideways(Board *pBoard, int dx)
+{
+	if (!TetrominoCollisionCheck(pBoard, dx, 0, pBoard->activeTetromino.orientationIndex))
+	{
+		printfd("MOVE %d: \n", dx);
+		pBoard->activeTetromino.x += dx;
+		pBoard->onGroundTime = 0;
+		pBoard->onGround = false;
+	}
+	else
+	{
+		printfd("MOVE %d: REVERT\n", dx);
+	}
 
-	printfd("\n");
 }
 void MoveDown(Board *pBoard)
 {
-	pBoard->activeTetromino.y += 1;
-	bool onGround = TetrominoCollisionCheck(pBoard, 0, 0, pBoard->activeTetromino.orientationIndex);
-	if (onGround)
+	if (!TetrominoCollisionCheck(pBoard, 0, 1, pBoard->activeTetromino.orientationIndex))
 	{
-		pBoard->activeTetromino.y += -1;
+		pBoard->activeTetromino.y += 1;
+	}
+	else {
 		pBoard->onGround = true;
+
 	}
 }
-/// @brief SRS Rotation
+/// @brief Rotation
 /// @param pBoard
 /// @param direction ±1
 /// @return 0 if failed, 1 if success
-bool SRSRotation(Board *pBoard, int direction)
+bool Rotation(Board *pBoard, int direction)
 {
 	int oldOrientation = pBoard->activeTetromino.orientationIndex;
-	int newOrientation = ((pBoard->activeTetromino.orientationIndex + direction) % 4 > -1) ? (pBoard->activeTetromino.orientationIndex + direction) % 4 : (pBoard->activeTetromino.orientationIndex + direction) % 4 + 4;
-	const int srsIndex = getSRSindex(pBoard->activeTetromino.orientationIndex, newOrientation);
+	int newOrientation = modneg(oldOrientation+direction,4);
+	const int srsIndex = getSRSindex(oldOrientation, newOrientation);
 	if (srsIndex == -1)
 	{
 		printfd("ERROR SRS");
 		return true;
 	}
 	printfd("srsIndex: %d\n", srsIndex);
-	for (int i = 0; i < 5; i++)
+	#if USE_SRS
+	int imax = 5;
+	#else
+	int imax = 1;
+	#endif
+	for (int i = 0; i < imax; i++)
 	{
 		int srsX = pBoard->activeTetromino.srsTests[srsIndex][i][0];
 		int srsY = pBoard->activeTetromino.srsTests[srsIndex][i][1];
@@ -280,13 +296,12 @@ bool SRSRotation(Board *pBoard, int direction)
 		printfd("test %d: %-7s (%d,%d)\n", i + 1, (success) ? "success" : "fail", srsX, srsY);
 		if (success)
 		{
-			// printfd("(%d,%d)\n",srsX,srsY);
 			pBoard->activeTetromino.x += srsX;
 			pBoard->activeTetromino.y += -srsY;
 			pBoard->activeTetromino.orientationIndex = newOrientation;
 			pBoard->onGround = false;
 			pBoard->onGroundTime = 0;
-			printfd("Current rotation: I%d\n", pBoard->activeTetromino.orientationIndex + 1);
+			printfd("Current rotation: I%d\n", newOrientation+1);
 			return true;
 		}
 	}
@@ -295,26 +310,7 @@ bool SRSRotation(Board *pBoard, int direction)
 	return false;
 }
 
-void RotateClockwise(Board *pBoard)
-{
-	int before = pBoard->activeTetromino.orientationIndex;
-	pBoard->activeTetromino.orientationIndex = (pBoard->activeTetromino.orientationIndex + 1) % 4;
 
-	if (TetrominoCollisionCheck(pBoard, 0, 0, pBoard->activeTetromino.orientationIndex))
-	{
-		pBoard->activeTetromino.orientationIndex = (pBoard->activeTetromino.orientationIndex - 1 > -1) ? pBoard->activeTetromino.orientationIndex - 1 : 3;
-	}
-}
-void RotateAntiClockwise(Board *pBoard)
-{
-
-	pBoard->activeTetromino.orientationIndex = (pBoard->activeTetromino.orientationIndex - 1 > -1) ? pBoard->activeTetromino.orientationIndex - 1 : 3;
-	if (TetrominoCollisionCheck(pBoard, 0, 0, pBoard->activeTetromino.orientationIndex))
-	{
-
-		pBoard->activeTetromino.orientationIndex = (pBoard->activeTetromino.orientationIndex + 1) % 4;
-	}
-}
 void ConvertToStatic(Board *pBoard)
 {
 

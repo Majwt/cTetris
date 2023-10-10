@@ -5,14 +5,6 @@
 #include "tetromino.h"
 #include "special.h"
 
-void changeSignSRS(int in[5][2], int out[5][2])
-{
-	for (int i = 0; i < 5; i++)
-	{
-		out[i][0] = -in[i][0];
-		out[i][1] = -in[i][1];
-	}
-}
 void fillTetrominoOrientation(Tetromino *pTetromino, int orientation[4][4][4])
 {
 	pTetromino->orientationIndex = 0;
@@ -153,26 +145,32 @@ Tetromino CreatePiece(int n)
 			{Z, 0, 0, 0},
 			{0, 0, 0, 0}}}};
 
-	// srsPair srs[2][5][8];
+
+	FILE* pieces = fopen("pieces","wb");
+
+	// pieces = fo
+	// Super Rotation System
+	// https://tetris.wiki/Super_Rotation_System
+	// https://web.archive.org/web/20071027030342/http://www.the-shell.net/img/j_piece.html
 	static int srs[2][8][5][2] = {
 		// I
-		{{{0, 0}, {-2, 0}, {+1, 0}, {+1, +2}, {-2, -1}},  // done I2 from I1
-		 {{0, 0}, {+2, 0}, {-1, 0}, {+2, +1}, {-1, -2}},  // done I1 from I2 
-		 {{0, 0}, {-1, 0}, {+2, 0}, {-1, +2}, {+2, -1}},  // done I3 from I2
-		 {{0, 0}, {-2, 0}, {+1, 0}, {-2, +1}, {+1, -1}},  // done I2 from I3 
-		 {{0, 0}, {+2, 0}, {-1, 0}, {+2, +1}, {-1, -2}},  // done I4 from I3 
-		 {{0, 0}, {+1, 0}, {-2, 0}, {+1, -2}, {-2, +1}},  // done I3 from I4 
-		 {{0, 0}, {-2, 0}, {+1, 0}, {-2, +1}, {+1, -2}},  // done I1 from I4 
-		 {{0, 0}, {+2, 0}, {-1, 0}, {-1, +2}, {+2, -1}}}, // done I4 from I1 
+		{{{0, 0}, {-2, 0}, {+1, 0}, {+1, +2}, {-2, -1}},  // 1 from 0
+		 {{0, 0}, {+2, 0}, {-1, 0}, {+2, +1}, {-1, -2}},  // 0 from 1 
+		 {{0, 0}, {-1, 0}, {+2, 0}, {-1, +2}, {+2, -1}},  // 2 from 1
+		 {{0, 0}, {-2, 0}, {+1, 0}, {-2, +1}, {+1, -1}},  // 1 from 2 
+		 {{0, 0}, {+2, 0}, {-1, 0}, {+2, +1}, {-1, -2}},  // 3 from 2 
+		 {{0, 0}, {+1, 0}, {-2, 0}, {+1, -2}, {-2, +1}},  // 2 from 3 
+		 {{0, 0}, {-2, 0}, {+1, 0}, {-2, +1}, {+1, -2}},  // 0 from 3 
+		 {{0, 0}, {+2, 0}, {-1, 0}, {-1, +2}, {+2, -1}}}, // 3 from 0 
 		// J, L, S, T, Z
-		{{{0, 0}, {-1, 0}, {-1, +1}, {0, -2}, {-1, -2}},   // done J2 from J1
-		 {{0, 0}, {+1, 0}, {+1, -1}, {0, +2}, {+1, +2}},   // done J1 from J2
-		 {{0, 0}, {+1, 0}, {+1, -1}, {0, +2}, {+1, +2}},   // done J3 from J2
-		 {{0, 0}, {-1, 0}, {-1, +1}, {0, -2}, {-1, -2}},   // done J2 from J3
-		 {{0, 0}, {+1, 0}, {+1, +1}, {0, -2}, {+1, -2}},   // done J4 from J3
-		 {{0, 0}, {-1, 0}, {-1, -1}, {0, +2}, {-1, +2}},   // done J3 from J4
-		 {{0, 0}, {-1, 0}, {-1, -1}, {0, +2}, {-1, +2}},   // done J1 from J4
-		 {{0, 0}, {+1, 0}, {+1, +1}, {0, -2}, {+1, -2}}}}; // done J4 from J1
+		{{{0, 0}, {-1, 0}, {-1, +1}, {0, -2}, {-1, -2}},   // 1 from 0
+		 {{0, 0}, {+1, 0}, {+1, -1}, {0, +2}, {+1, +2}},   // 0 from 1
+		 {{0, 0}, {+1, 0}, {+1, -1}, {0, +2}, {+1, +2}},   // 2 from 1
+		 {{0, 0}, {-1, 0}, {-1, +1}, {0, -2}, {-1, -2}},   // 1 from 2
+		 {{0, 0}, {+1, 0}, {+1, +1}, {0, -2}, {+1, -2}},   // 3 from 2
+		 {{0, 0}, {-1, 0}, {-1, -1}, {0, +2}, {-1, +2}},   // 2 from 3
+		 {{0, 0}, {-1, 0}, {-1, -1}, {0, +2}, {-1, +2}},   // 0 from 3
+		 {{0, 0}, {+1, 0}, {+1, +1}, {0, -2}, {+1, -2}}}}; // 3 from 0
 
 	Tetromino piece;
 	copySRS(srs[(n>1) ? 1 : 0],piece.srsTests);
@@ -199,7 +197,7 @@ int getSRSindex(int from, int to)
 	printfd("I%d from I%d\n",to+1,from+1);
 	switch (from)
 	{
-	case 0: // I1
+	case 0: 
 		if (to == 1)
 		{
 			return 0;
@@ -210,7 +208,7 @@ int getSRSindex(int from, int to)
 		}
 		return -1;
 		break;
-	case 1: // I2
+	case 1:
 		if (to == 0)
 		{
 			return 1;
@@ -222,7 +220,7 @@ int getSRSindex(int from, int to)
 		return -1;
 
 		break;
-	case 2: // I3
+	case 2:
 		if (to == 1)
 		{
 			return 3;
@@ -234,15 +232,15 @@ int getSRSindex(int from, int to)
 		return -1;
 
 		break;
-	case 3: // I4
+	case 3:
 		if (to == 0)
 		{
-			// I1
+		
 			return 6;
 		}
 		else if (to == 2)
 		{
-			// I3
+		
 			return 5;
 		}
 		return -1;

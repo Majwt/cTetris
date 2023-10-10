@@ -4,7 +4,6 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 
-
 #include "defines.h"
 #include "utils.h"
 #include "board.h"
@@ -35,7 +34,6 @@ struct game
 	GameState state;
 };
 typedef struct game Game;
-
 
 int initGame(Game *pGame);
 void runGame(Game *pGame);
@@ -99,6 +97,7 @@ void mainMenu(Game *pGame)
 
 int main(int argv, char **args)
 {
+
 	Game g = {0};
 	if (!initGame(&g))
 		return 1;
@@ -133,8 +132,8 @@ int initGame(Game *pGame)
 	srand(time(NULL));
 	rand();
 
-
-	if (!InitFont("./assets/BigBlueTermPlusNerdFont-Regular.ttf")) {
+	if (!InitFont("./assets/BigBlueTermPlusNerdFont-Regular.ttf"))
+	{
 		printfd("Error: FONT\n");
 
 		return 0;
@@ -212,6 +211,10 @@ void runGame(Game *pGame)
 				pGame->gravity = pGame->level;
 			}
 		}
+		if (GameOverCheck(pGame->pBoard))
+		{
+			pGame->state = GAMEOVER;
+		}
 
 		if (isTetrominoOnGround(pGame->pBoard))
 		{
@@ -239,33 +242,29 @@ void handleInput(Game *pGame, const uint8_t *keysPressed)
 	if ((keysPressed[SDL_SCANCODE_A] && !keysPressed[SDL_SCANCODE_LEFT]) ||
 		(!keysPressed[SDL_SCANCODE_A] && keysPressed[SDL_SCANCODE_LEFT]))
 	{
-		MoveSideways(pGame->pBoard, -1);
+		Move(pGame->pBoard,-1,0);
+		// MoveSideways(pGame->pBoard, -1);
 	}
 	if ((keysPressed[SDL_SCANCODE_D] && !keysPressed[SDL_SCANCODE_RIGHT]) ||
 		(!keysPressed[SDL_SCANCODE_D] && keysPressed[SDL_SCANCODE_RIGHT]))
 	{
-		MoveSideways(pGame->pBoard, +1);
+		Move(pGame->pBoard,+1,0);
+		// MoveSideways(pGame->pBoard, +1);
 	}
 	if ((keysPressed[SDL_SCANCODE_W] && !keysPressed[SDL_SCANCODE_UP]) ||
 		(!keysPressed[SDL_SCANCODE_W] && keysPressed[SDL_SCANCODE_UP]))
 	{
-		#if USE_SRS
-		SRSRotation(pGame->pBoard,1);
-		#else
-		RotateClockwise(pGame->pBoard);
-		#endif
+		Rotation(pGame->pBoard, 1);
 	}
 	if ((keysPressed[SDL_SCANCODE_S] && !keysPressed[SDL_SCANCODE_DOWN]) ||
 		(!keysPressed[SDL_SCANCODE_S] && keysPressed[SDL_SCANCODE_DOWN]))
 	{
-		#if USE_SRS
-		SRSRotation(pGame->pBoard,-1);
-		#else
-		RotateAntiClockwise(pGame->pBoard);
-		#endif
+		Rotation(pGame->pBoard, -1);
 	}
-	if (keysPressed[SDL_SCANCODE_K]) {
-		MoveDown(pGame->pBoard);
+	if (keysPressed[SDL_SCANCODE_K])
+	{
+		Move(pGame->pBoard,0,1);
+		// MoveDown(pGame->pBoard);
 	}
 	if (keysPressed[SDL_SCANCODE_SPACE])
 	{
