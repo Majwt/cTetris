@@ -1,3 +1,4 @@
+#include <SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,115 +12,110 @@ Pair createPair(char name[], int score)
 
 	Pair tmp;
 	tmp.score = score;
-	strcpy(tmp.name,name);
+	strcpy(tmp.name, name);
 	return tmp;
 }
 
-void SaveHighscore(Pair highscores[])
+void SaveHighscore(Pair highscores[], int size)
 {
-	sortScores(highscores);
+	sortScores(highscores,size);
+	if (size == HIGHSCORE_MAX_SAVES) {
+		size-=1;
+	}
 	FILE *ptr = fopen(HIGHSCORE_SAVE_FILENAME, "w");
 	if (ptr == NULL)
 	{
 		printfd("Error!");
 		exit(1);
 	}
-	fprintf(ptr,"scores:\n");
-	for (int i = 0; i < HIGHSCORE_MAX_SAVES; i++)
+	fprintf(ptr, "scores:\n");
+	printPairs(highscores,size);
+	for (int i = 0; i < size; i++)
 	{
-		fprintf(ptr, "%s : %d\n", highscores[i].name, highscores[i].score);
+		fprintf(ptr, "%s %d\n", highscores[i].name, highscores[i].score);
 	}
 
 	fclose(ptr);
 }
 
-void LoadHighscore(Pair highscores[])
+void LoadHighscore(Pair highscores[], int *size)
 {
 	FILE *ptr = fopen(HIGHSCORE_SAVE_FILENAME, "r");
 	if (ptr == NULL)
 	{
 		printfd("CREATING HIGHSCORE FILE\n");
-		for (int i = 0; i < HIGHSCORE_MAX_SAVES; i++)
-		{
-			highscores[i] = createPair("nan",0);
-		}
-		SaveHighscore(highscores);
+		
+		SaveHighscore(highscores, *size);
 		fclose(ptr);
-		LoadHighscore(highscores);
+		LoadHighscore(highscores, size);
 		return;
 	}
-	char name[100];
+	char name[4];
 	int readScore = 0;
-	int i = 0;
-	char test[10];
-	fscanf(ptr,"%s\n",test);
-	if (strcmp(test,"scores:")) {
-		printfd("FILE ERROR\n");
-		exit(1);
-	}
-	while (fscanf(ptr, "%s : %d", name, &readScore) == 2)
+	char line[100];
+	char *result;
+	while ((result = fgets(line,100,ptr)) != NULL)
 	{
-		highscores[i] = createPair(name,readScore);
-		i++;
+		int len = strlen(result);
+		if ((len > 0 && result[len-1] == '\n') && !strcmp(result,"scores:\n") == 0) {
+			result[len-1]=0;
+			sscanf(result,"%s %d",name,&readScore);
+			printfd("%s %d\n",name,readScore);
+			if (readScore > 0) {
+				InsertScore(highscores,size,name,readScore);
+			}
+		}
 	}
 	fclose(ptr);
-	if (i < HIGHSCORE_MAX_SAVES) {
-		for (int j = i; j < HIGHSCORE_MAX_SAVES; j++)
-		{
-			highscores[j] = createPair("nan",0);
-		}
-		
-	}
-	sortScores(highscores);
+
+	sortScores(highscores,*size);
 }
 
-void sortScores(Pair highscores[])
+void sortScores(Pair highscores[], int size)
 {
-	for (int i = 0; i < HIGHSCORE_MAX_SAVES; i++)
+	for (int i = 0; i < size; i++)
 	{
-		for (int j = 0; j < HIGHSCORE_MAX_SAVES - i - 1; j++)
+		for (int j = 0; j < size - i - 1; j++)
 		{
 			if (highscores[j].score < highscores[j + 1].score)
 			{
-				swapPair(&highscores[j],&highscores[j+1]);
+				swapPair(&highscores[j], &highscores[j + 1]);
 			}
 		}
 	}
 }
-bool InsertScore(Pair highscores[], char name[], int score)
+bool InsertScore(Pair highscores[], int *size, char name[], int score)
 {
 
-	Pair tmp = createPair(name,score);
-	bool inserted = false;
-	for (int i = 0; i < HIGHSCORE_MAX_SAVES; i++)
+	if (*size + 1 > HIGHSCORE_MAX_SAVES)
 	{
-		if (inserted == false && tmp.score > highscores[i].score)
-		{
-			inserted = true;
-			swapPair(&tmp,&highscores[i]);
-		}
-		else if (inserted == true && i < HIGHSCORE_MAX_SAVES) {
-			swapPair(&tmp,&highscores[i]);
-		}
+		return 1;
 	}
-	return inserted;
+	
+	Pair tmp = createPair(name, score);
+	highscores[*size] = tmp;
+	sortScores(highscores, *size);
+	printfd("size: %d\n",*size);
+	(*size)++;
+	return 0;
 }
-void swapPair(Pair *A,Pair *B)
+void swapPair(Pair *A, Pair *B)
 {
 	Pair tmp = *A;
 	*A = *B;
 	*B = tmp;
 }
 
-void printPairs(Pair highscores[]) {
+void printPairs(Pair highscores[],int size)
+{
 	printfd("print\n");
-	for (int i = 0; i < HIGHSCORE_MAX_SAVES; i++)
+	for (int i = 0; i < size; i++)
 	{
-		printfd("%s : %d\n",highscores[i].name,highscores[i].score);
+		printfd("%s %d\n", highscores[i].name, highscores[i].score);
 	}
 	printfd("\n");
-	
 }
-void printPair(Pair score) {
-	printfd("name: %s, score: %d\n",score.name,score.score);
+void printPair(Pair score)
+{
+	printfd("name: %s, score: %d\n", score.name, score.score);
 }

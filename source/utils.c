@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include "defines.h"
+#include "highscore.h"
 #include "special.h"
 #include "utils.h"
 
@@ -53,7 +54,7 @@ void TextInput(SDL_Event event, char buffer[])
 {
 	const char *keyName = SDL_GetKeyName(event.key.keysym.sym);
 	int bufferlen = strlen(buffer);
-	if (bufferlen < 8 && strlen(keyName) == 1 && keyName[0] >= 'A' && keyName[0] <= 'Z')
+	if (bufferlen < 4 && strlen(keyName) == 1 && keyName[0] >= 'A' && keyName[0] <= 'Z')
 	{
 		strcat(buffer, keyName);
 	}
@@ -66,4 +67,16 @@ void TextInput(SDL_Event event, char buffer[])
 bool PointRectCollision(int x, int y, SDL_Rect rect)
 {
 	return (x > rect.x && x < rect.x + rect.w && y > rect.y && y < rect.y + rect.h);
+}
+void displayScoreboard(Pair highscores[],int size,SDL_Renderer* pRenderer,SDL_Rect position) {
+	
+	ShowText(pRenderer,White,15,position,false,"Highscore");
+	position.y += 20;
+	for (int i = 0; i < size; i++)
+	{
+		// Pair* pHighscore = &highscores[i];
+		position.y += ShowText(pRenderer,White,12,position,false,"%3s %-7d",highscores[i].name,highscores[i].score).h+10;
+		// printPair(highscores[i]);
+	}
+		
 }
