@@ -45,55 +45,6 @@ void mainMenu(Game *pGame);
 void drawGameUI(Game *pGame);
 void gameOverView(Game *pGame);
 
-void mainMenu(Game *pGame)
-{
-	static SDL_Event event;
-
-	static SDL_Rect startButtonRect;
-	static int level = 0;
-	startButtonRect.h = 75;
-	startButtonRect.w = 200;
-	startButtonRect.x = WINDOW_WIDTH / 2 - startButtonRect.w / 2;
-	startButtonRect.y = WINDOW_HEIGHT / 2 - startButtonRect.h / 2;
-	int mouseX, mouseY;
-	SDL_GetMouseState(&mouseX, &mouseY);
-	while (SDL_PollEvent(&event))
-	{
-		if (event.button.state == SDL_PRESSED && PointRectCollision(mouseX, mouseY, startButtonRect))
-		{
-			printfd("PRESSED\n");
-			pGame->level = level;
-			pGame->state = PLAY;
-		}
-		if (event.type == SDL_QUIT)
-		{
-			pGame->state = QUIT;
-		}
-		if (event.type == SDL_KEYDOWN)
-		{
-			if (event.key.keysym.sym == SDLK_UP)
-			{
-				level += 1;
-			}
-			if (event.key.keysym.sym == SDLK_DOWN && level > 0)
-			{
-				level -= 1;
-			}
-		}
-	}
-	static SDL_Rect titleRect = {WINDOW_WIDTH / 2, 50};
-	ShowText(pGame->pRenderer, White, FONT_SIZE, titleRect, true, "TETRIS");
-
-	static SDL_Rect startLevelRect = {WINDOW_WIDTH / 2, 200};
-	ShowText(pGame->pRenderer, White, FONT_SIZE, startLevelRect, true, "STARTING LEVEL: %2d", level);
-
-	SDL_SetRenderDrawColor(pGame->pRenderer, 0, 200, 0, 255);
-	SDL_RenderFillRect(pGame->pRenderer, &startButtonRect);
-
-	startButtonRect.x = WINDOW_WIDTH / 2;
-	startButtonRect.y = WINDOW_HEIGHT / 2 - 10;
-	ShowText(pGame->pRenderer, White, FONT_SIZE, startButtonRect, true, "START");
-}
 
 int main(int argv, char **args)
 {
@@ -221,12 +172,11 @@ void runGame(Game *pGame)
 			NextRound(pGame->pBoard, &pGame->score, &pGame->level, &pGame->lines);
 			pGame->gravity = pGame->level;
 		}
-#if DEBUG == 0
+
 		else if (frameCounter % (FPS - ((pGame->gravity >= FPS) ? FPS - 1 : pGame->gravity)) == 0)
 		{
-			MoveDown(pGame->pBoard);
+			Move(pGame->pBoard,0,1);
 		}
-#endif
 		DrawTetromino(pGame->pBoard);
 		DrawOccupied(pGame->pBoard);
 		drawGameUI(pGame);
@@ -243,13 +193,11 @@ void handleInput(Game *pGame, const uint8_t *keysPressed)
 		(!keysPressed[SDL_SCANCODE_A] && keysPressed[SDL_SCANCODE_LEFT]))
 	{
 		Move(pGame->pBoard,-1,0);
-		// MoveSideways(pGame->pBoard, -1);
 	}
 	if ((keysPressed[SDL_SCANCODE_D] && !keysPressed[SDL_SCANCODE_RIGHT]) ||
 		(!keysPressed[SDL_SCANCODE_D] && keysPressed[SDL_SCANCODE_RIGHT]))
 	{
 		Move(pGame->pBoard,+1,0);
-		// MoveSideways(pGame->pBoard, +1);
 	}
 	if ((keysPressed[SDL_SCANCODE_W] && !keysPressed[SDL_SCANCODE_UP]) ||
 		(!keysPressed[SDL_SCANCODE_W] && keysPressed[SDL_SCANCODE_UP]))
@@ -264,7 +212,6 @@ void handleInput(Game *pGame, const uint8_t *keysPressed)
 	if (keysPressed[SDL_SCANCODE_K])
 	{
 		Move(pGame->pBoard,0,1);
-		// MoveDown(pGame->pBoard);
 	}
 	if (keysPressed[SDL_SCANCODE_SPACE])
 	{
@@ -339,15 +286,65 @@ void gameOverView(Game *pGame)
 			}
 		}
 	}
-	static SDL_Rect nameRect = {WINDOW_WIDTH / 2, 200};
-	static SDL_Rect gameOverRect = {WINDOW_WIDTH / 2, 50};
-	static SDL_Rect scoreRect = {WINDOW_WIDTH / 2, 100};
-	static SDL_Rect nameinputRect = {WINDOW_WIDTH / 2, 300};
 
-	ShowText(pGame->pRenderer, White, FONT_SIZE, gameOverRect, true, "GAME OVER");
+	static SDL_Rect nameRect = {WINDOW_WIDTH / 2, 200};
 	ShowText(pGame->pRenderer, White, FONT_SIZE, nameRect, true, "Type Name:");
 
+	static SDL_Rect gameOverRect = {WINDOW_WIDTH / 2, 50};
+	ShowText(pGame->pRenderer, White, FONT_SIZE, gameOverRect, true, "GAME OVER");
+
+	static SDL_Rect scoreRect = {WINDOW_WIDTH / 2, 100};
 	ShowText(pGame->pRenderer, White, FONT_SIZE, scoreRect, true, "Score: %d", pGame->score);
 
-	ShowText(pGame->pRenderer, White, FONT_SIZE, nameRect, true, nameBuffer);
+	static SDL_Rect nameinputRect = {WINDOW_WIDTH / 2, 300};
+	ShowText(pGame->pRenderer, White, FONT_SIZE, nameinputRect, true, nameBuffer);
+}
+void mainMenu(Game *pGame)
+{
+	static SDL_Event event;
+
+	static SDL_Rect startButtonRect;
+	static int level = 0;
+	startButtonRect.h = 75;
+	startButtonRect.w = 200;
+	startButtonRect.x = WINDOW_WIDTH / 2 - startButtonRect.w / 2;
+	startButtonRect.y = WINDOW_HEIGHT / 2 - startButtonRect.h / 2;
+	int mouseX, mouseY;
+	SDL_GetMouseState(&mouseX, &mouseY);
+	while (SDL_PollEvent(&event))
+	{
+		if (event.button.state == SDL_PRESSED && PointRectCollision(mouseX, mouseY, startButtonRect))
+		{
+			printfd("PRESSED\n");
+			pGame->level = level;
+			pGame->state = PLAY;
+		}
+		if (event.type == SDL_QUIT)
+		{
+			pGame->state = QUIT;
+		}
+		if (event.type == SDL_KEYDOWN)
+		{
+			if (event.key.keysym.sym == SDLK_UP)
+			{
+				level += 1;
+			}
+			if (event.key.keysym.sym == SDLK_DOWN && level > 0)
+			{
+				level -= 1;
+			}
+		}
+	}
+	static SDL_Rect titleRect = {WINDOW_WIDTH / 2, 50};
+	ShowText(pGame->pRenderer, White, FONT_SIZE, titleRect, true, "TETRIS");
+
+	static SDL_Rect startLevelRect = {WINDOW_WIDTH / 2, 200};
+	ShowText(pGame->pRenderer, White, FONT_SIZE, startLevelRect, true, "STARTING LEVEL: %2d", level);
+
+	SDL_SetRenderDrawColor(pGame->pRenderer, 0, 200, 0, 255);
+	SDL_RenderFillRect(pGame->pRenderer, &startButtonRect);
+
+	startButtonRect.x = WINDOW_WIDTH / 2;
+	startButtonRect.y = WINDOW_HEIGHT / 2 - 10;
+	ShowText(pGame->pRenderer, White, FONT_SIZE, startButtonRect, true, "START");
 }
