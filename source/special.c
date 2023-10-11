@@ -4,6 +4,13 @@
 #include <stdarg.h>
 #include <string.h>
 
+int modneg(int a, int b) {
+	int m = a%b;
+	if (m<0) {
+		m+=b;
+	}
+	return m;
+}
 void printfd(const char* format, ...) {
 	#if DEBUG
 	printf("[DEBUG] ");
