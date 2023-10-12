@@ -26,7 +26,7 @@ struct game
 	SDL_Window *pWindow;
 	SDL_Renderer *pRenderer;
 	Board *pBoard;
-	Pair HighScores[HIGHSCORE_MAX_SAVES+1];
+	Score HighScores[HIGHSCORE_MAX_SAVES+1];
 	int highscoreSize;
 	int score;
 	int level;
@@ -53,6 +53,11 @@ int main(int argv, char **args)
 	Game g = {0};
 	if (!initGame(&g))
 		return 1;
+
+	// g.HighScores[0] = createScore("tes",120);
+	// g.highscoreSize = 1;
+
+	// SaveHighscore(g.HighScores,g.highscoreSize);
 	while (g.state != QUIT)
 	{
 		SDL_SetRenderDrawColor(g.pRenderer, 0, 0, 0, 255);
@@ -113,7 +118,13 @@ int initGame(Game *pGame)
 	initBoard(pGame);
 	pGame->state = MENU;
 	pGame->highscoreSize = 0;
-	LoadHighscore(pGame->HighScores,&pGame->highscoreSize);
+
+	if (!LoadHighscore(pGame->HighScores,&pGame->highscoreSize)) {
+		createHighscoreFile();
+		if (!LoadHighscore(pGame->HighScores,&pGame->highscoreSize)) {
+			return 0;
+		}
+	}
 	return 1;
 }
 void initBoard(Game *pGame)
@@ -218,6 +229,7 @@ void handleInput(Game *pGame, const uint8_t *keysPressed)
 	if (keysPressed[SDL_SCANCODE_SPACE])
 	{
 		pGame->gravity = FPS;
+		pGame->score+=1;
 	}
 }
 
@@ -229,7 +241,9 @@ void closeGame(Game *pGame)
 		SDL_DestroyWindow(pGame->pWindow);
 	if (font)
 		TTF_CloseFont(font);
-	SaveHighscore(pGame->HighScores,pGame->highscoreSize);
+	if (!SaveHighscore(pGame->HighScores,pGame->highscoreSize)) {
+		printfd("ERROR SAVING FILE\n");
+	}
 	SDL_Quit();
 }
 
@@ -283,10 +297,14 @@ void gameOverView(Game *pGame)
 			if (event.key.keysym.sym == SDLK_RETURN && strlen(nameBuffer) > 1)
 			{
 				pGame->state = MENU;
+				
 				InsertScore(pGame->HighScores,&pGame->highscoreSize, nameBuffer, pGame->score);
-				SaveHighscore(pGame->HighScores,pGame->highscoreSize);
+				if (!SaveHighscore(pGame->HighScores,pGame->highscoreSize))
+					printfd("ERROR SAVING FILE\n");
 				pGame->highscoreSize = 0;
-				LoadHighscore(pGame->HighScores,&pGame->highscoreSize);
+
+				if(!LoadHighscore(pGame->HighScores,&pGame->highscoreSize))
+					printfd("ERROR LOADING FILE\n");
 			}
 		}
 	}

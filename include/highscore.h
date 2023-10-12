@@ -1,19 +1,19 @@
 #ifndef highscore_h
 #define highscore_h
-struct pairType
+struct score
 {
-	int score;
 	char name[4];
+	int value;
 };
-typedef struct pairType Pair;
+typedef struct score Score;
 
-Pair createPair(char name[],int score);
-void SaveHighscore(Pair highscores[],int size);
-void LoadHighscore(Pair highscores[],int *size);
-void sortScores(Pair highscores[],int size);
-bool InsertScore(Pair highscores[],int *size, char name[], int score);
-void swapPair(Pair *A,Pair *B);
-void printPairs(Pair highscores[],int size);
-void printPair(Pair score);
+Score createScore(char name[],int score);
+void createHighscoreFile();
+bool SaveHighscore(Score highscores[],int size);
+bool LoadHighscore(Score highscores[],int *size);
+void sortScores(Score highscores[],int size);
+bool InsertScore(Score highscores[],int *size, char name[], int score);
+
+void swapScore(Score *A,Score *B);
 
 #endif

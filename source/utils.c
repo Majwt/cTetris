@@ -58,7 +58,7 @@ void TextInput(SDL_Event event, char buffer[])
 	{
 		strcat(buffer, keyName);
 	}
-	else if (strcmp(keyName, "Backspace") == 0 && bufferlen > 0)
+	if (strcmp(keyName, "Backspace") == 0 && bufferlen > 0)
 	{
 		int len = strlen(buffer);
 		buffer[len - 1] = '\0';
@@ -68,15 +68,13 @@ bool PointRectCollision(int x, int y, SDL_Rect rect)
 {
 	return (x > rect.x && x < rect.x + rect.w && y > rect.y && y < rect.y + rect.h);
 }
-void displayScoreboard(Pair highscores[],int size,SDL_Renderer* pRenderer,SDL_Rect position) {
+void displayScoreboard(Score highscores[],int size,SDL_Renderer* pRenderer,SDL_Rect position) {
 	
 	ShowText(pRenderer,White,15,position,false,"Highscore");
 	position.y += 20;
 	for (int i = 0; i < size; i++)
 	{
-		// Pair* pHighscore = &highscores[i];
-		position.y += ShowText(pRenderer,White,12,position,false,"%3s %-7d",highscores[i].name,highscores[i].score).h+10;
-		// printPair(highscores[i]);
+		position.y += ShowText(pRenderer,White,12,position,false,"%3s %-7d",highscores[i].name,highscores[i].value).h+10;
 	}
 		
 }
