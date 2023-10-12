@@ -52,11 +52,6 @@ int main(int argv, char **args)
 	Game g = {0};
 	if (!initGame(&g))
 		return 1;
-
-	// g.HighScores[0] = createScore("tes",120);
-	// g.highscoreSize = 1;
-
-	// SaveHighscore(g.HighScores,g.highscoreSize);
 	while (g.state != QUIT)
 	{
 		SDL_SetRenderDrawColor(g.pRenderer, 0, 0, 0, 255);
@@ -240,7 +235,7 @@ void closeGame(Game *pGame)
 		SDL_DestroyWindow(pGame->pWindow);
 	if (font)
 		TTF_CloseFont(font);
-	if (!SaveHighscore(pGame->highscores)) {
+	if (!SaveHighscore(&pGame->highscores)) {
 		printfd("ERROR SAVING FILE\n");
 	}
 	SDL_Quit();
@@ -298,7 +293,7 @@ void gameOverView(Game *pGame)
 				pGame->state = MENU;
 				
 				InsertScore(&pGame->highscores, nameBuffer, pGame->score);
-				if (!SaveHighscore(pGame->highscores))
+				if (!SaveHighscore(&pGame->highscores))
 					printfd("ERROR SAVING FILE\n");
 				pGame->highscores.size = 0;
 

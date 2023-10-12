@@ -19,25 +19,15 @@ void createHighscoreFile()
 {
 	printfd("CREATING HIGHSCORE FILE\n");
 	FILE *fp = fopen(HIGHSCORE_SAVE_FILENAME, "wb");
-	if (fp == NULL)
-	{
-		printfd("ERROR CREATING FILE\n");
-		fclose(fp);
-		return;
-	}
-
-	int zero = 0;
-	fwrite(&zero, sizeof(int), 1, fp);
+	Highscores_t tmp;
+	tmp.size = 0;
+	fwrite(&tmp,sizeof(Highscores_t),1,fp);
 	fclose(fp);
 }
 
-bool SaveHighscore(Highscores_t highscores)
+bool SaveHighscore(Highscores_t *highscores)
 {
-	sortScores(&highscores);
-	if (highscores.size == HIGHSCORE_MAX_SAVES)
-	{
-		highscores.size -= 1;
-	}
+	sortScores(highscores);
 	FILE *fp = fopen(HIGHSCORE_SAVE_FILENAME, "wb");
 	if (fp == NULL)
 	{
@@ -45,13 +35,8 @@ bool SaveHighscore(Highscores_t highscores)
 		fclose(fp);
 		return false;
 	}
-	if (fwrite(&highscores.size, sizeof(int), 1, fp) != 1)
-	{
-		fclose(fp);
-		return false;
-	}
-	if (fwrite(highscores.scores, sizeof(Score), highscores.size, fp) != highscores.size)
-	{
+	if (fwrite(highscores,sizeof(Highscores_t),1,fp) != 1) {
+
 		fclose(fp);
 		return false;
 	}
@@ -68,13 +53,7 @@ bool LoadHighscore(Highscores_t *highscores)
 		return false;
 	}
 
-	if (fread(&highscores->size, sizeof(int), 1, fp) != 1)
-	{
-		fclose(fp);
-		return false;
-	}
-
-	if (highscores->size > 0 && fread(&highscores->scores, sizeof(Score), highscores->size, fp) != highscores->size)
+	if (fread(highscores, sizeof(Highscores_t), 1, fp) != 1)
 	{
 		fclose(fp);
 		return false;

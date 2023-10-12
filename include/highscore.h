@@ -14,7 +14,7 @@ typedef struct _highscore {
 
 Score createScore(char name[],int score);
 void createHighscoreFile();
-bool SaveHighscore(Highscores_t highscores);
+bool SaveHighscore(Highscores_t *highscores);
 bool LoadHighscore(Highscores_t *highscores);
 void sortScores(Highscores_t *highscores);
 bool InsertScore(Highscores_t *highscores, char name[], int score);
