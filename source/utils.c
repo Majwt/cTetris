@@ -68,13 +68,13 @@ bool PointRectCollision(int x, int y, SDL_Rect rect)
 {
 	return (x > rect.x && x < rect.x + rect.w && y > rect.y && y < rect.y + rect.h);
 }
-void displayScoreboard(Score highscores[],int size,SDL_Renderer* pRenderer,SDL_Rect position) {
+void displayScoreboard(Highscores_t highscore,SDL_Renderer* pRenderer,SDL_Rect position) {
 	
 	ShowText(pRenderer,White,15,position,false,"Highscore");
 	position.y += 20;
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < highscore.size; i++)
 	{
-		position.y += ShowText(pRenderer,White,12,position,false,"%3s %-7d",highscores[i].name,highscores[i].value).h+10;
+		position.y += ShowText(pRenderer,White,12,position,false,"%3s %-7d",highscore.scores[i].name,highscore.scores[i].value).h+10;
 	}
 		
 }

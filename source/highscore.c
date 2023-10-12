@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include "highscore.h"
 #include "defines.h"
+#include "highscore.h"
 #include "special.h"
 
 Score createScore(char name[], int score)
@@ -25,19 +25,18 @@ void createHighscoreFile()
 		fclose(fp);
 		return;
 	}
-	// FILE *fp = fopen(HIGHSCORE_SAVE_FILENAME, "wb");
 
 	int zero = 0;
 	fwrite(&zero, sizeof(int), 1, fp);
 	fclose(fp);
 }
 
-bool SaveHighscore(Score highscores[], int size)
+bool SaveHighscore(Highscores_t highscores)
 {
-	sortScores(highscores, size);
-	if (size == HIGHSCORE_MAX_SAVES)
+	sortScores(&highscores);
+	if (highscores.size == HIGHSCORE_MAX_SAVES)
 	{
-		size -= 1;
+		highscores.size -= 1;
 	}
 	FILE *fp = fopen(HIGHSCORE_SAVE_FILENAME, "wb");
 	if (fp == NULL)
@@ -46,12 +45,12 @@ bool SaveHighscore(Score highscores[], int size)
 		fclose(fp);
 		return false;
 	}
-	if (fwrite(&size, sizeof(int), 1, fp) != 1)
+	if (fwrite(&highscores.size, sizeof(int), 1, fp) != 1)
 	{
 		fclose(fp);
 		return false;
 	}
-	if (fwrite(highscores, sizeof(Score), size, fp) != size)
+	if (fwrite(highscores.scores, sizeof(Score), highscores.size, fp) != highscores.size)
 	{
 		fclose(fp);
 		return false;
@@ -60,7 +59,7 @@ bool SaveHighscore(Score highscores[], int size)
 	return true;
 }
 
-bool LoadHighscore(Score highscores[], int *size)
+bool LoadHighscore(Highscores_t *highscores)
 {
 	FILE *fp = fopen(HIGHSCORE_SAVE_FILENAME, "rb");
 	if (fp == NULL)
@@ -69,13 +68,13 @@ bool LoadHighscore(Score highscores[], int *size)
 		return false;
 	}
 
-	if (fread(size, sizeof(int), 1, fp) != 1)
+	if (fread(&highscores->size, sizeof(int), 1, fp) != 1)
 	{
 		fclose(fp);
 		return false;
 	}
 
-	if (*size > 0 && fread(highscores, sizeof(Score), *size, fp) != *size)
+	if (highscores->size > 0 && fread(&highscores->scores, sizeof(Score), highscores->size, fp) != highscores->size)
 	{
 		fclose(fp);
 		return false;
@@ -85,32 +84,32 @@ bool LoadHighscore(Score highscores[], int *size)
 	return true;
 }
 
-void sortScores(Score highscores[], int size)
+void sortScores(Highscores_t *highscores)
 {
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < highscores->size; i++)
 	{
-		for (int j = 0; j < size - i - 1; j++)
+		for (int j = 0; j < highscores->size - i - 1; j++)
 		{
-			if (highscores[j].value < highscores[j + 1].value)
+			if (highscores->scores[j].value < highscores->scores[j + 1].value)
 			{
-				swapScore(&highscores[j], &highscores[j + 1]);
+				swapScore(&highscores->scores[j], &highscores->scores[j + 1]);
 			}
 		}
 	}
 }
-bool InsertScore(Score highscores[], int *size, char name[], int value)
+bool InsertScore(Highscores_t *highscores, char name[], int value)
 {
 
-	if (*size + 1 > HIGHSCORE_MAX_SAVES)
+	if (highscores->size + 1 > HIGHSCORE_MAX_SAVES)
 	{
 		return 1;
 	}
 
 	Score tmp = createScore(name, value);
-	highscores[*size] = tmp;
-	sortScores(highscores, *size);
-	printfd("size: %d\n", *size);
-	(*size)++;
+	highscores->scores[highscores->size] = tmp;
+	sortScores(highscores);
+	printfd("size: %d\n", highscores->size);
+	highscores->size++;
 	return 0;
 }
 void swapScore(Score *A, Score *B)

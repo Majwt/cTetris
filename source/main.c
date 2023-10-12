@@ -26,8 +26,7 @@ struct game
 	SDL_Window *pWindow;
 	SDL_Renderer *pRenderer;
 	Board *pBoard;
-	Score HighScores[HIGHSCORE_MAX_SAVES+1];
-	int highscoreSize;
+	Highscores_t highscores;
 	int score;
 	int level;
 	int lines;
@@ -117,11 +116,11 @@ int initGame(Game *pGame)
 	}
 	initBoard(pGame);
 	pGame->state = MENU;
-	pGame->highscoreSize = 0;
+	pGame->highscores.size = 0;
 
-	if (!LoadHighscore(pGame->HighScores,&pGame->highscoreSize)) {
+	if (!LoadHighscore(&pGame->highscores)) {
 		createHighscoreFile();
-		if (!LoadHighscore(pGame->HighScores,&pGame->highscoreSize)) {
+		if (!LoadHighscore(&pGame->highscores)) {
 			return 0;
 		}
 	}
@@ -241,7 +240,7 @@ void closeGame(Game *pGame)
 		SDL_DestroyWindow(pGame->pWindow);
 	if (font)
 		TTF_CloseFont(font);
-	if (!SaveHighscore(pGame->HighScores,pGame->highscoreSize)) {
+	if (!SaveHighscore(pGame->highscores)) {
 		printfd("ERROR SAVING FILE\n");
 	}
 	SDL_Quit();
@@ -277,7 +276,7 @@ void drawGameUI(Game *pGame)
 
 	rightTextRect.y += rightTextRect.h;
 	SDL_Rect scoreboardRect = {10,100};
-	displayScoreboard(pGame->HighScores,pGame->highscoreSize,pGame->pRenderer,scoreboardRect);
+	displayScoreboard(pGame->highscores,pGame->pRenderer,scoreboardRect);
 	ShowText(pGame->pRenderer, White, FONT_SIZE, rightTextRect, false, "%4d", pGame->level);
 }
 
@@ -298,12 +297,12 @@ void gameOverView(Game *pGame)
 			{
 				pGame->state = MENU;
 				
-				InsertScore(pGame->HighScores,&pGame->highscoreSize, nameBuffer, pGame->score);
-				if (!SaveHighscore(pGame->HighScores,pGame->highscoreSize))
+				InsertScore(&pGame->highscores, nameBuffer, pGame->score);
+				if (!SaveHighscore(pGame->highscores))
 					printfd("ERROR SAVING FILE\n");
-				pGame->highscoreSize = 0;
+				pGame->highscores.size = 0;
 
-				if(!LoadHighscore(pGame->HighScores,&pGame->highscoreSize))
+				if(!LoadHighscore(&pGame->highscores))
 					printfd("ERROR LOADING FILE\n");
 			}
 		}
@@ -358,7 +357,7 @@ void mainMenu(Game *pGame)
 		}
 	}
 	static SDL_Rect scoreboardRect = {10,100};
-	displayScoreboard(pGame->HighScores,pGame->highscoreSize,pGame->pRenderer,scoreboardRect);
+	displayScoreboard(pGame->highscores,pGame->pRenderer,scoreboardRect);
 	static SDL_Rect titleRect = {WINDOW_WIDTH / 2, 50};
 	ShowText(pGame->pRenderer, White, FONT_SIZE, titleRect, true, "TETRIS");
 
