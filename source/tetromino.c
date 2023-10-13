@@ -146,7 +146,7 @@ Tetromino CreatePiece(int n)
 			{0, 0, 0, 0}}}};
 
 
-	FILE* pieces = fopen("pieces","wb");
+	// FILE* pieces = fopen("pieces","wb");
 
 	// pieces = fo
 	// Super Rotation System

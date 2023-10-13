@@ -5,9 +5,10 @@
 #include <SDL_ttf.h>
 
 #include "defines.h"
-#include "utils.h"
-#include "board.h"
 #include "highscore.h"
+#include "utils.h"
+#include "tetromino.h"
+#include "board.h"
 #include "special.h"
 
 #define FPS 30
@@ -26,7 +27,7 @@ struct game
 	SDL_Window *pWindow;
 	SDL_Renderer *pRenderer;
 	Board *pBoard;
-	Pair HighScores[HIGHSCORE_MAX_SAVES];
+	Highscores_t highscores;
 	int score;
 	int level;
 	int lines;
@@ -50,6 +51,7 @@ int main(int argv, char **args)
 {
 
 	Game g = {0};
+    
 	if (!initGame(&g))
 		return 1;
 	while (g.state != QUIT)
@@ -82,7 +84,6 @@ int initGame(Game *pGame)
 {
 	srand(time(NULL));
 	rand();
-
 	if (!InitFont("./assets/BigBlueTermPlusNerdFont-Regular.ttf"))
 	{
 		printfd("Error: FONT\n");
@@ -111,7 +112,29 @@ int initGame(Game *pGame)
 	}
 	initBoard(pGame);
 	pGame->state = MENU;
-	LoadHighscore(pGame->HighScores);
+	pGame->highscores.size = 0;
+
+    bool fileExists = loadHighscoresTxt(&pGame->highscores);
+    printfd("fileExists: %d\n",fileExists);
+	if (fileExists == false) {
+        printfd("STARTING GAME\n");
+		createHighscoresTxtFile();
+		if (!loadHighscoresTxt(&pGame->highscores)) {
+			return 0;
+		}
+	}
+
+    #if 0
+    bool fileExists = loadHighscoresBin(&pGame->highscores);
+    printfd("fileExists: %d\n",fileExists);
+	if (fileExists == false) {
+        printfd("STARTING GAME\n");
+		createHighscoresBinFile();
+		if (!loadHighscoresBin(&pGame->highscores)) {
+			return 0;
+		}
+	}
+    #endif
 	return 1;
 }
 void initBoard(Game *pGame)
@@ -133,7 +156,7 @@ void runGame(Game *pGame)
 	SDL_Event event;
 	const uint8_t *keyPressed = SDL_GetKeyboardState(NULL);
 	int frameCounter = 0;
-
+    printfd("%d\n",pGame->pBoard->onGround);
 	while (pGame->state == PLAY)
 	{
 		SDL_SetRenderDrawColor(pGame->pRenderer, 0, 0, 0, 255);
@@ -177,8 +200,8 @@ void runGame(Game *pGame)
 		{
 			Move(pGame->pBoard,0,1);
 		}
-		DrawTetromino(pGame->pBoard);
 		DrawOccupied(pGame->pBoard);
+		DrawTetromino(pGame->pBoard);
 		drawGameUI(pGame);
 
 		SDL_RenderPresent(pGame->pRenderer);
@@ -216,6 +239,7 @@ void handleInput(Game *pGame, const uint8_t *keysPressed)
 	if (keysPressed[SDL_SCANCODE_SPACE])
 	{
 		pGame->gravity = FPS;
+		pGame->score+=1;
 	}
 }
 
@@ -227,7 +251,14 @@ void closeGame(Game *pGame)
 		SDL_DestroyWindow(pGame->pWindow);
 	if (font)
 		TTF_CloseFont(font);
-	SaveHighscore(pGame->HighScores);
+	if (!saveHighscoresTxt(&pGame->highscores)) {
+		printfd("ERROR SAVING FILE\n");
+	}
+    #if 0
+	if (!saveHighscoresBin(&pGame->highscores)) {
+		printfd("ERROR SAVING FILE\n");
+	}
+    #endif
 	SDL_Quit();
 }
 
@@ -260,7 +291,8 @@ void drawGameUI(Game *pGame)
 	rightTextRect = ShowText(pGame->pRenderer, White, FONT_SIZE, rightTextRect, false, "Level");
 
 	rightTextRect.y += rightTextRect.h;
-
+	SDL_Rect scoreboardRect = {10,100};
+	displayScoreboard(pGame->highscores,pGame->pRenderer,scoreboardRect);
 	ShowText(pGame->pRenderer, White, FONT_SIZE, rightTextRect, false, "%4d", pGame->level);
 }
 
@@ -280,9 +312,21 @@ void gameOverView(Game *pGame)
 			if (event.key.keysym.sym == SDLK_RETURN && strlen(nameBuffer) > 1)
 			{
 				pGame->state = MENU;
-				InsertScore(pGame->HighScores, nameBuffer, pGame->score);
-				SaveHighscore(pGame->HighScores);
-				LoadHighscore(pGame->HighScores);
+				insertScore(&pGame->highscores, nameBuffer, pGame->score);
+				if (!saveHighscoresTxt(&pGame->highscores))
+					printfd("ERROR SAVING FILE\n");
+				pGame->highscores.size = 0;
+
+				if(!loadHighscoresTxt(&pGame->highscores))
+					printfd("ERROR LOADING FILE\n");
+				#if 0
+				if (!saveHighscoresBin(&pGame->highscores))
+					printfd("ERROR SAVING FILE\n");
+				pGame->highscores.size = 0;
+
+				if(!loadHighscoresBin(&pGame->highscores))
+					printfd("ERROR LOADING FILE\n");
+                #endif
 			}
 		}
 	}
@@ -335,6 +379,8 @@ void mainMenu(Game *pGame)
 			}
 		}
 	}
+	static SDL_Rect scoreboardRect = {10,100};
+	displayScoreboard(pGame->highscores,pGame->pRenderer,scoreboardRect);
 	static SDL_Rect titleRect = {WINDOW_WIDTH / 2, 50};
 	ShowText(pGame->pRenderer, White, FONT_SIZE, titleRect, true, "TETRIS");
 

@@ -1,125 +1,161 @@
+#include <SDL.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include "highscore.h"
 #include "defines.h"
+#include "highscore.h"
 #include "special.h"
 
-Pair createPair(char name[], int score)
+Score_t createScore ( char name[], int score )
 {
 
-	Pair tmp;
-	tmp.score = score;
-	strcpy(tmp.name,name);
-	return tmp;
+    Score_t tmp;
+    tmp.value = score;
+    strcpy ( tmp.name, name );
+    return tmp;
 }
 
-void SaveHighscore(Pair highscores[])
+void createHighscoresTxtFile ()
 {
-	sortScores(highscores);
-	FILE *ptr = fopen(HIGHSCORE_SAVE_FILENAME, "w");
-	if (ptr == NULL)
-	{
-		printfd("Error!");
-		exit(1);
-	}
-	fprintf(ptr,"scores:\n");
-	for (int i = 0; i < HIGHSCORE_MAX_SAVES; i++)
-	{
-		fprintf(ptr, "%s : %d\n", highscores[i].name, highscores[i].score);
-	}
-
-	fclose(ptr);
+    printfd ( "CREATING HIGHSCORE FILE\n" );
+    char filename[100] = HIGHSCORE_FILENAME;
+    strcat ( filename, ".txt" );
+    printfd ( "filename: %s\n", filename );
+    FILE* fp = fopen ( filename, "wb" );
+    Highscores_t tmp;
+    tmp.size = 0;
+    fwrite ( &tmp, sizeof ( Highscores_t ), 1, fp );
+    fclose ( fp );
 }
 
-void LoadHighscore(Pair highscores[])
+bool saveHighscoresTxt ( Highscores_t* highscores )
 {
-	FILE *ptr = fopen(HIGHSCORE_SAVE_FILENAME, "r");
-	if (ptr == NULL)
-	{
-		printfd("CREATING HIGHSCORE FILE\n");
-		for (int i = 0; i < HIGHSCORE_MAX_SAVES; i++)
-		{
-			highscores[i] = createPair("nan",0);
-		}
-		SaveHighscore(highscores);
-		fclose(ptr);
-		LoadHighscore(highscores);
-		return;
-	}
-	char name[100];
-	int readScore = 0;
-	int i = 0;
-	char test[10];
-	fscanf(ptr,"%s\n",test);
-	if (strcmp(test,"scores:")) {
-		printfd("FILE ERROR\n");
-		exit(1);
-	}
-	while (fscanf(ptr, "%s : %d", name, &readScore) == 2)
-	{
-		highscores[i] = createPair(name,readScore);
-		i++;
-	}
-	fclose(ptr);
-	if (i < HIGHSCORE_MAX_SAVES) {
-		for (int j = i; j < HIGHSCORE_MAX_SAVES; j++)
-		{
-			highscores[j] = createPair("nan",0);
-		}
-		
-	}
-	sortScores(highscores);
+    sortScores ( highscores );
+    char filename[100] = HIGHSCORE_FILENAME;
+    strcat ( filename, ".txt" );
+    FILE* fp = fopen ( filename, "w" );
+    if (fp == NULL) {
+        printfd ( "Error opening file for writing.\n" );
+        return false;
+    }
+
+    for (int i = 0; i < highscores->size; i++) {
+        fprintf ( fp, "%d %s\n", highscores->scores[i].value, highscores->scores[i].name );
+    }
+
+    fclose ( fp );
+    return true;
 }
 
-void sortScores(Pair highscores[])
+bool loadHighscoresTxt ( Highscores_t* highscores )
 {
-	for (int i = 0; i < HIGHSCORE_MAX_SAVES; i++)
-	{
-		for (int j = 0; j < HIGHSCORE_MAX_SAVES - i - 1; j++)
-		{
-			if (highscores[j].score < highscores[j + 1].score)
-			{
-				swapPair(&highscores[j],&highscores[j+1]);
-			}
-		}
-	}
-}
-bool InsertScore(Pair highscores[], char name[], int score)
-{
+    char filename[100] = HIGHSCORE_FILENAME;
+    strcat ( filename, ".txt" );
+    FILE* fp = fopen ( filename, "r" );
 
-	Pair tmp = createPair(name,score);
-	bool inserted = false;
-	for (int i = 0; i < HIGHSCORE_MAX_SAVES; i++)
-	{
-		if (inserted == false && tmp.score > highscores[i].score)
-		{
-			inserted = true;
-			swapPair(&tmp,&highscores[i]);
-		}
-		else if (inserted == true && i < HIGHSCORE_MAX_SAVES) {
-			swapPair(&tmp,&highscores[i]);
-		}
-	}
-	return inserted;
-}
-void swapPair(Pair *A,Pair *B)
-{
-	Pair tmp = *A;
-	*A = *B;
-	*B = tmp;
+    if (fp == NULL) {
+        printfd ( "Error opening file for reading.\n" );
+        return false;
+    }
+
+    highscores->size = 0;
+    while (fscanf ( fp, "%d %s", &highscores->scores[highscores->size].value, highscores->scores[highscores->size].name ) == 2) {
+        highscores->size++;
+    }
+
+    fclose ( fp );
+    return true;
 }
 
-void printPairs(Pair highscores[]) {
-	printfd("print\n");
-	for (int i = 0; i < HIGHSCORE_MAX_SAVES; i++)
-	{
-		printfd("%s : %d\n",highscores[i].name,highscores[i].score);
-	}
-	printfd("\n");
-	
+void createHighscoresBinFile ()
+{
+    printfd ( "CREATING HIGHSCORE FILE\n" );
+    char filename[100] = HIGHSCORE_FILENAME;
+    strcat ( filename, ".bin" );
+    printfd ( "filename: %s\n", filename );
+    FILE* fp = fopen ( filename, "wb" );
+    Highscores_t tmp;
+    tmp.size = 0;
+    fwrite ( &tmp, sizeof ( Highscores_t ), 1, fp );
+    fclose ( fp );
 }
-void printPair(Pair score) {
-	printfd("name: %s, score: %d\n",score.name,score.score);
+
+bool SaveHighscoresBin ( Highscores_t* highscores )
+{
+    sortScores ( highscores );
+    char filename[100] = HIGHSCORE_FILENAME;
+    strcat ( filename, ".bin" );
+    printfd ( "filename: %s\n", filename );
+    FILE* fp = fopen ( filename, "wb" );
+    if (fp == NULL)
+    {
+        printfd ( "Error!" );
+        return false;
+    }
+    if (fwrite ( highscores, sizeof ( Highscores_t ), 1, fp ) != 1) {
+
+        fclose ( fp );
+        return false;
+    }
+    fclose ( fp );
+    return true;
 }
+
+bool LoadHighscoresBin ( Highscores_t* highscores )
+{
+    char filename[100] = HIGHSCORE_FILENAME;
+    strcat ( filename, ".bin" );
+    printfd ( "filename: %s\n", filename );
+    FILE* fp = fopen ( filename, "rb" );
+    if (fp == NULL)
+    {
+        printfd ( "NULL: %s\n", filename );
+        return false;
+    }
+
+    if (fread ( highscores, sizeof ( Highscores_t ), 1, fp ) != 1)
+    {
+        fclose ( fp );
+        return false;
+    }
+
+    fclose ( fp );
+    return true;
+}
+
+void sortScores ( Highscores_t* highscores )
+{
+    for (int i = 0; i < highscores->size; i++)
+    {
+        for (int j = 0; j < highscores->size - i - 1; j++)
+        {
+            if (highscores->scores[j].value < highscores->scores[j + 1].value)
+            {
+                swapScore ( &highscores->scores[j], &highscores->scores[j + 1] );
+            }
+        }
+    }
+}
+bool insertScore ( Highscores_t* highscores, char name[], int value )
+{
+
+    if (highscores->size + 1 > HIGHSCORE_MAX_SAVES)
+    {
+        return 1;
+    }
+
+    Score_t tmp = createScore ( name, value );
+    highscores->scores[highscores->size] = tmp;
+    sortScores ( highscores );
+    printfd ( "size: %d\n", highscores->size );
+    highscores->size++;
+    return 0;
+}
+void swapScore ( Score_t* A, Score_t* B )
+{
+    Score_t tmp = *A;
+    *A = *B;
+    *B = tmp;
+}
+

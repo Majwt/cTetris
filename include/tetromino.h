@@ -1,12 +1,12 @@
 #ifndef tetromino_h
 #define tetromino_h
-typedef struct tetromino Tetromino;
+
 
 typedef struct srs_pair {
 	int y,x;
 } srsPair;
 enum pieceType {I=1,O,T,J,L,S,Z};
-struct tetromino
+typedef struct tetromino
 {
 	// top left
 	int x;
@@ -15,7 +15,7 @@ struct tetromino
 	int width;
 	int orientations[4][4][4];
 	int srsTests[8][5][2];
-};
+} Tetromino;
 
 Tetromino CreatePiece(int n);
 void fillTetrinoOrientation(Tetromino *pTetromino, int orientation[4][4][4]);

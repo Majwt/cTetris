@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include "defines.h"
+#include "highscore.h"
 #include "special.h"
 #include "utils.h"
 
@@ -53,11 +54,11 @@ void TextInput(SDL_Event event, char buffer[])
 {
 	const char *keyName = SDL_GetKeyName(event.key.keysym.sym);
 	int bufferlen = strlen(buffer);
-	if (bufferlen < 8 && strlen(keyName) == 1 && keyName[0] >= 'A' && keyName[0] <= 'Z')
+	if (bufferlen < 4 && strlen(keyName) == 1 && keyName[0] >= 'A' && keyName[0] <= 'Z')
 	{
 		strcat(buffer, keyName);
 	}
-	else if (strcmp(keyName, "Backspace") == 0 && bufferlen > 0)
+	if (strcmp(keyName, "Backspace") == 0 && bufferlen > 0)
 	{
 		int len = strlen(buffer);
 		buffer[len - 1] = '\0';
@@ -66,4 +67,14 @@ void TextInput(SDL_Event event, char buffer[])
 bool PointRectCollision(int x, int y, SDL_Rect rect)
 {
 	return (x > rect.x && x < rect.x + rect.w && y > rect.y && y < rect.y + rect.h);
+}
+void displayScoreboard(Highscores_t highscore,SDL_Renderer* pRenderer,SDL_Rect position) {
+	
+	ShowText(pRenderer,White,15,position,false,"Highscore");
+	position.y += 20;
+	for (int i = 0; i < highscore.size; i++)
+	{
+		position.y += ShowText(pRenderer,White,12,position,false,"%3s %-7d",highscore.scores[i].name,highscore.scores[i].value).h+10;
+	}
+		
 }
