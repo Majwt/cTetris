@@ -7,6 +7,7 @@
 #include "defines.h"
 #include "highscore.h"
 #include "utils.h"
+#include "tetromino.h"
 #include "board.h"
 #include "special.h"
 
@@ -50,6 +51,7 @@ int main(int argv, char **args)
 {
 
 	Game g = {0};
+    
 	if (!initGame(&g))
 		return 1;
 	while (g.state != QUIT)
@@ -82,7 +84,6 @@ int initGame(Game *pGame)
 {
 	srand(time(NULL));
 	rand();
-
 	if (!InitFont("./assets/BigBlueTermPlusNerdFont-Regular.ttf"))
 	{
 		printfd("Error: FONT\n");
@@ -113,12 +114,27 @@ int initGame(Game *pGame)
 	pGame->state = MENU;
 	pGame->highscores.size = 0;
 
-	if (!LoadHighscore(&pGame->highscores)) {
-		createHighscoreFile();
-		if (!LoadHighscore(&pGame->highscores)) {
+    bool fileExists = loadHighscoresTxt(&pGame->highscores);
+    printfd("fileExists: %d\n",fileExists);
+	if (fileExists == false) {
+        printfd("STARTING GAME\n");
+		createHighscoresTxtFile();
+		if (!loadHighscoresTxt(&pGame->highscores)) {
 			return 0;
 		}
 	}
+
+    #if 0
+    bool fileExists = loadHighscoresBin(&pGame->highscores);
+    printfd("fileExists: %d\n",fileExists);
+	if (fileExists == false) {
+        printfd("STARTING GAME\n");
+		createHighscoresBinFile();
+		if (!loadHighscoresBin(&pGame->highscores)) {
+			return 0;
+		}
+	}
+    #endif
 	return 1;
 }
 void initBoard(Game *pGame)
@@ -140,7 +156,7 @@ void runGame(Game *pGame)
 	SDL_Event event;
 	const uint8_t *keyPressed = SDL_GetKeyboardState(NULL);
 	int frameCounter = 0;
-
+    printfd("%d\n",pGame->pBoard->onGround);
 	while (pGame->state == PLAY)
 	{
 		SDL_SetRenderDrawColor(pGame->pRenderer, 0, 0, 0, 255);
@@ -235,9 +251,14 @@ void closeGame(Game *pGame)
 		SDL_DestroyWindow(pGame->pWindow);
 	if (font)
 		TTF_CloseFont(font);
-	if (!SaveHighscore(&pGame->highscores)) {
+	if (!saveHighscoresTxt(&pGame->highscores)) {
 		printfd("ERROR SAVING FILE\n");
 	}
+    #if 0
+	if (!saveHighscoresBin(&pGame->highscores)) {
+		printfd("ERROR SAVING FILE\n");
+	}
+    #endif
 	SDL_Quit();
 }
 
@@ -291,14 +312,21 @@ void gameOverView(Game *pGame)
 			if (event.key.keysym.sym == SDLK_RETURN && strlen(nameBuffer) > 1)
 			{
 				pGame->state = MENU;
-				
-				InsertScore(&pGame->highscores, nameBuffer, pGame->score);
-				if (!SaveHighscore(&pGame->highscores))
+				insertScore(&pGame->highscores, nameBuffer, pGame->score);
+				if (!saveHighscoresTxt(&pGame->highscores))
 					printfd("ERROR SAVING FILE\n");
 				pGame->highscores.size = 0;
 
-				if(!LoadHighscore(&pGame->highscores))
+				if(!loadHighscoresTxt(&pGame->highscores))
 					printfd("ERROR LOADING FILE\n");
+				#if 0
+				if (!saveHighscoresBin(&pGame->highscores))
+					printfd("ERROR SAVING FILE\n");
+				pGame->highscores.size = 0;
+
+				if(!loadHighscoresBin(&pGame->highscores))
+					printfd("ERROR LOADING FILE\n");
+                #endif
 			}
 		}
 	}

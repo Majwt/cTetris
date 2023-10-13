@@ -24,7 +24,7 @@
 
 #define ONGROUND_TIME_MIN 0.05
 
-#define HIGHSCORE_SAVE_FILENAME "highscores.bin"
+#define HIGHSCORE_FILENAME "highscores"
 #define HIGHSCORE_MAX_SAVES 10
 
 #define FONT_SIZE 25

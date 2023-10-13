@@ -1,24 +1,28 @@
 #ifndef highscore_h
 #define highscore_h
-struct score
+typedef struct 
 {
 	char name[4];
 	int value;
-};
-typedef struct score Score;
+} Score_t;
 
-typedef struct _highscore {
+typedef struct {
 	int size;
-	Score scores[HIGHSCORE_MAX_SAVES+1];
+	Score_t scores[HIGHSCORE_MAX_SAVES+1];
 } Highscores_t;
 
-Score createScore(char name[],int score);
-void createHighscoreFile();
-bool SaveHighscore(Highscores_t *highscores);
-bool LoadHighscore(Highscores_t *highscores);
-void sortScores(Highscores_t *highscores);
-bool InsertScore(Highscores_t *highscores, char name[], int score);
+Score_t createScore(char name[],int score);
+void createHighscoresTxtFile();
+bool saveHighscoresTxt(Highscores_t *highscores);
+bool loadHighscoresTxt(Highscores_t *highscores);
 
-void swapScore(Score *A,Score *B);
+void createHighscoresBinFile();
+bool saveHighscoresBin(Highscores_t *highscores);
+bool loadHighscoresBin(Highscores_t *highscores);
+
+void sortScores(Highscores_t *highscores);
+bool insertScore(Highscores_t *highscores, char name[], int score);
+
+void swapScore(Score_t *A,Score_t *B);
 
 #endif

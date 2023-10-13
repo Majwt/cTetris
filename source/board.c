@@ -4,22 +4,10 @@
 #include <time.h>
 #include "defines.h"
 #include "tetromino.h"
-#include "board.h"
 #include "special.h"
+#include "board.h"
 
-struct board
-{
-	int x, y;
-	int width, height;
-	SDL_Renderer *pRenderer;
-	int occupied[BOARD_ROWS][BOARD_COLUMNS];
-	SDL_Color colors[7];
-	Tetromino activeTetromino;
-	Tetromino nextTetromino;
-	double onGroundTime;
-	bool onGround;
-	double now_t, prev_t;
-};
+
 
 Board *CreateBoard(SDL_Renderer *pRenderer)
 {
