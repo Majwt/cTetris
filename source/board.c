@@ -1,10 +1,8 @@
 #include <SDL.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <time.h>
 #include "defines.h"
+#include "standard.h"
+#include "text.h"
 #include "tetromino.h"
-#include "special.h"
 #include "board.h"
 
 
@@ -85,6 +83,15 @@ Board *CreateBoard(SDL_Renderer *pRenderer)
 	RandomPiece(&nextPiece);
 	board->nextTetromino = nextPiece;
 
+    SDL_Rect rightside = {board->x+board->width+20,board->y,0,0};
+
+    board->pLinesText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf",FONT_SIZE,board->pRenderer, (SDL_Rect){board->x + board->width / 2, board->y - 50} , White, true, "LINES - %03d");
+	board->pScoreText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf",FONT_SIZE,board->pRenderer, rightside, White, false, "SCORE:\n%7d");
+    rightside.y+=100;
+	board->pNextText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf",FONT_SIZE,board->pRenderer, rightside, White, false, "Next:");
+    rightside.y+=100;
+	board->pLevelText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf",FONT_SIZE,board->pRenderer, rightside, White, false, "Level:\n%4d");
+    
 #if DEBUG_BOARD
 	printf("setting non random piece %d\n", DEBUG_PIECEID);
 	board->activeTetromino = CreatePiece(DEBUG_PIECEID);
@@ -102,7 +109,7 @@ void DrawOccupied(Board *pBoard)
 	rect.w = TETROMINOSIZE;
 	rect.x = pBoard->x;
 	rect.y = pBoard->y;
-
+    
 	for (int y = 0; y < BOARD_ROWS; y++)
 	{
 		for (int x = 0; x < BOARD_COLUMNS; x++)
@@ -132,7 +139,7 @@ void DrawOccupied(Board *pBoard)
 	// Left Line
 	SDL_RenderDrawLine(pBoard->pRenderer, pBoard->x-1, pBoard->y, pBoard->x-1, pBoard->y + pBoard->height);
 	// Bottom Line
-	SDL_RenderDrawLine(pBoard->pRenderer, pBoard->x-1, pBoard->y + pBoard->height+1, pBoard->x-1 + pBoard->width+1, pBoard->y + pBoard->height);
+	SDL_RenderDrawLine(pBoard->pRenderer, pBoard->x-1, pBoard->y + pBoard->height+1, pBoard->x-1 + pBoard->width+1, pBoard->y + pBoard->height+1);
 	// Right Line
 	SDL_RenderDrawLine(pBoard->pRenderer, pBoard->x-1 + pBoard->width+1, pBoard->y, pBoard->x-1 + pBoard->width+1, pBoard->y + pBoard->height);
 }

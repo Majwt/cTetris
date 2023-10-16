@@ -1,8 +1,4 @@
-#include "defines.h"
-#include "special.h"
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
+#include "standard.h"
 
 int modneg(int a, int b) {
 	int m = a%b;

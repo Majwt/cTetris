@@ -2,9 +2,7 @@
 #define tetromino_h
 
 
-typedef struct srs_pair {
-	int y,x;
-} srsPair;
+
 enum pieceType {I=1,O,T,J,L,S,Z};
 typedef struct tetromino
 {
@@ -15,6 +13,7 @@ typedef struct tetromino
 	int width;
 	int orientations[4][4][4];
 	int srsTests[8][5][2];
+    enum pieceType type;
 } Tetromino;
 
 Tetromino CreatePiece(int n);

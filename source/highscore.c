@@ -1,11 +1,9 @@
 #include <SDL.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdbool.h>
+#include <SDL_ttf.h>
+#include "text.h"
 #include "defines.h"
+#include "standard.h"
 #include "highscore.h"
-#include "special.h"
 
 Score_t createScore ( char name[], int score )
 {
@@ -50,6 +48,14 @@ bool saveHighscoresTxt ( Highscores_t* highscores )
 
 bool loadHighscoresTxt ( Highscores_t* highscores )
 {
+    if (highscores == NULL) {
+        printfd ( "highscores is NULL\n" );
+        highscores = malloc ( sizeof ( Highscores_t ) );
+        highscores->size = 0;
+        highscores->pHighscoreText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf", 15, NULL, (SDL_Rect){0,0,0,0}, White, true, "HIGHSCORES" );
+        highscores->pScoreText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf", 12, NULL, (SDL_Rect){0,0,0,0}, White, false, "%3s %-7d" );
+        return false;
+    }
     char filename[100] = HIGHSCORE_FILENAME;
     strcat ( filename, ".txt" );
     FILE* fp = fopen ( filename, "r" );
@@ -158,4 +164,22 @@ void swapScore ( Score_t* A, Score_t* B )
     *A = *B;
     *B = tmp;
 }
+void displayScoreboard(Highscores_t highscore,SDL_Renderer* pRenderer,SDL_Rect position) {
+	
+    highscore.pHighscoreText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf", 15, pRenderer, position, White, true, "HIGHSCORES");
+    highscore.pScoreText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf", 12, pRenderer, position, White, false, "%3s %-7d");
+    highscore.pHighscoreText->rect.x = position.x;
+    highscore.pHighscoreText->rect.y = position.y;
+    highscore.pHighscoreText->pRenderer = pRenderer;
+    
+	showText(highscore.pHighscoreText);
+    highscore.pScoreText->rect.x = position.x;
+	highscore.pScoreText->rect.y = position.y+20;
+	for (int i = 0; i < highscore.size; i++)
+	{
+		highscore.pScoreText->rect.y += showText(highscore.pScoreText,highscore.scores[i].name,highscore.scores[i].value).h+10;
+	}
+		
+}
+
 

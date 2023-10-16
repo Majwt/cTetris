@@ -1,5 +1,6 @@
 #ifndef board_h
 #define board_h
+#include <stdbool.h>
 
 typedef struct board Board;
 
@@ -15,6 +16,10 @@ struct board
 	double onGroundTime;
 	bool onGround;
 	double now_t, prev_t;
+    Text_t *pScoreText;
+    Text_t *pLevelText;
+    Text_t *pLinesText;
+    Text_t *pNextText;
 };
 
 Board *CreateBoard(SDL_Renderer *pRenderer);

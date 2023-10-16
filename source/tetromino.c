@@ -1,9 +1,6 @@
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include "defines.h"
+#include "standard.h"
 #include "tetromino.h"
-#include "special.h"
 
 void fillTetrominoOrientation(Tetromino *pTetromino, int orientation[4][4][4])
 {
@@ -173,6 +170,7 @@ Tetromino CreatePiece(int n)
 		 {{0, 0}, {+1, 0}, {+1, +1}, {0, -2}, {+1, -2}}}}; // 3 from 0
 
 	Tetromino piece;
+    piece.type = n;
 	copySRS(srs[(n>1) ? 1 : 0],piece.srsTests);
 	fillTetrominoOrientation(&piece, pieceOrientations[n]);
 	piece.x = 3;
