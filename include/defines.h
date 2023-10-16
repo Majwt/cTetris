@@ -1,10 +1,10 @@
 #ifndef defines_h
 #define defines_h
 
-#define FPS 30
+#define FPS 60
 
 
-#define DEBUG 0
+#define DEBUG 1
 #define DEBUG_BOARD 0
 #define DEBUG_PIECEID 0
 #define USE_SRS 1

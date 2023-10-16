@@ -20,14 +20,20 @@ SDL_Rect center ( SDL_Rect rect )
     rect.y -= rect.h / 2;
     return rect;
 }
-bool xor ( bool a, bool b )
+bool xor (bool a, bool b)
 {
     return (a || b) && !(a && b);
 }
-int max ( int a, int b )
+
+int min ( int a, int b )
 {
-    return a > b ? a : b;
+    if (a < b)
+    {
+        return a;
+    }
+    return b;
 }
+
 
 int initGame ( Game* pGame )
 {
@@ -104,29 +110,29 @@ void initBoard ( Game* pGame )
         free ( pGame->pBoard );
     }
     pGame->pBoard = CreateBoard ( pGame->pRenderer );
-    pGame->lines = 0;
-    pGame->score = 0;
-    pGame->gravity = pGame->level;
+    pGame->pBoard->onGround = false;
+    pGame->pBoard->onGroundTime = 0;
+    pGame->player.score = 0;
+    pGame->player.lines = 0;
+    strcpy(pGame->player.name,"YOU");
+    pGame->player.passedThreshold = false;
+
 }
 
 void runGame ( Game* pGame )
 {
 
-    bool close_requested = false;
-    // const uint8_t* keyPressed = SDL_GetKeyboardState ( NULL );
     int frameCounter = 0;
-    pGame->pBoard->onGround = false;
-    pGame->pBoard->onGroundTime = 0;
-    int framesPerFall[29] = {48,43,38,33,28,23,18,13,8,6,5,5,5,4,4,4,3,3,3,2,2,2,2,2,2,2,2,2,1};
+    
+    const int framesPerFall[29] = { 48,43,38,33,28,23,18,13,8,6,5,5,5,4,4,4,3,3,3,2,2,2,2,2,2,2,2,2,1 };
     while (pGame->state == PLAY)
     {
+        frameCounter++;
         SDL_SetRenderDrawColor ( pGame->pRenderer, 0, 0, 0, 255 );
         SDL_RenderClear ( pGame->pRenderer );
         SDL_SetRenderDrawColor ( pGame->pRenderer, 230, 230, 230, 255 );
-        frameCounter++;
         if (GameOverCheck ( pGame->pBoard ))
         {
-            close_requested = true;
             pGame->state = GAMEOVER;
             continue;
         }
@@ -134,30 +140,28 @@ void runGame ( Game* pGame )
         {
             if (pGame->event.type == SDL_QUIT)
             {
-                close_requested = 1;
                 pGame->state = QUIT;
             }
             else if (pGame->event.key.type == SDL_KEYDOWN)
             {
-                handleInput ( pGame);
+                handleInput ( pGame );
             }
             else if (pGame->event.key.type == SDL_KEYUP && pGame->event.key.keysym.scancode == SDL_SCANCODE_SPACE)
             {
-                pGame->gravity = pGame->level;
+                pGame->gravity = pGame->player.level;
             }
         }
         if (GameOverCheck ( pGame->pBoard ))
         {
             pGame->state = GAMEOVER;
+            break;
         }
-
         if (isTetrominoOnGround ( pGame->pBoard ))
         {
-            NextRound ( pGame->pBoard, &pGame->score, &pGame->level, &pGame->lines );
-            pGame->gravity = pGame->level;
+            NextRound ( pGame->pBoard, &pGame->player );
+            pGame->gravity = pGame->player.level;
         }
-
-        else if (frameCounter % framesPerFall[max(pGame->level,29)] == 0 && frameCounter > 0)
+        else if ((frameCounter % framesPerFall[min ( pGame->gravity, 29 )] == 0))
         {
             
             Move ( pGame->pBoard, 0, 1 );
@@ -172,13 +176,13 @@ void runGame ( Game* pGame )
     }
 }
 
-void handleInput ( Game* pGame)
+void handleInput ( Game* pGame )
 {
-    bool left = xor(pGame->keysPressed[SDL_SCANCODE_A], pGame->keysPressed[SDL_SCANCODE_LEFT]);
-    bool right = xor(pGame->keysPressed[SDL_SCANCODE_D], pGame->keysPressed[SDL_SCANCODE_RIGHT]);
-    bool spinright = xor(pGame->keysPressed[SDL_SCANCODE_W], pGame->keysPressed[SDL_SCANCODE_UP]);
-    bool spinleft = xor(pGame->keysPressed[SDL_SCANCODE_S], pGame->keysPressed[SDL_SCANCODE_DOWN]);
-    
+    bool left = xor (pGame->keysPressed[SDL_SCANCODE_A], pGame->keysPressed[SDL_SCANCODE_LEFT]);
+    bool right = xor (pGame->keysPressed[SDL_SCANCODE_D], pGame->keysPressed[SDL_SCANCODE_RIGHT]);
+    bool spinright = xor (pGame->keysPressed[SDL_SCANCODE_W], pGame->keysPressed[SDL_SCANCODE_UP]);
+    bool spinleft = xor (pGame->keysPressed[SDL_SCANCODE_S], pGame->keysPressed[SDL_SCANCODE_DOWN]);
+
     if (left)
     {
         Move ( pGame->pBoard, -1, 0 );
@@ -197,12 +201,15 @@ void handleInput ( Game* pGame)
     }
     if (pGame->keysPressed[SDL_SCANCODE_K])
     {
-        Move ( pGame->pBoard, 0, 1 );
+        pGame->player.lines+=1;
+    }
+    if (pGame->keysPressed[SDL_SCANCODE_L])
+    {
+        pGame->player.level+=1;
     }
     if (pGame->keysPressed[SDL_SCANCODE_SPACE] && pGame->pBoard->onGround == false)
     {
-        pGame->gravity = FPS;
-        pGame->score += 1;
+        pGame->gravity = 18;
     }
 }
 
@@ -235,43 +242,44 @@ void drawGameUI ( Game* pGame )
 {
 
     // Lines
-    showText ( pGame->pBoard->pLinesText, pGame->lines );
+    showText ( pGame->pBoard->pLinesText, pGame->player.lines );
     // Score
-    showText ( pGame->pBoard->pScoreText, pGame->score );
+    showText ( pGame->pBoard->pScoreText, pGame->player.score );
     // Next piece
     SDL_Rect rightTextRect = showText ( pGame->pBoard->pNextText );
     ShowNextPiece ( pGame->pBoard, rightTextRect.x, rightTextRect.y + rightTextRect.h );
     // Level
-    showText ( pGame->pBoard->pLevelText, pGame->level );
+    showText ( pGame->pBoard->pLevelText, pGame->player.level );
     SDL_Rect scoreboardRect = { 10,100 };
-    displayScoreboard ( pGame->highscores, pGame->pRenderer, scoreboardRect );
+    displayScoreboard ( pGame->highscores,pGame->player, pGame->pRenderer, scoreboardRect );
 }
 
 void gameOverView ( Game* pGame )
 {
-    
+
     char nameBuffer[10] = "";
+    pGame->player.name[0] = '\0';
     while (pGame->state == GAMEOVER) {
 
+        SDL_SetRenderDrawColor ( pGame->pRenderer, 0, 0, 0, 255 );
+        SDL_RenderClear ( pGame->pRenderer );
         while (SDL_PollEvent ( &pGame->event ))
         {
-            SDL_SetRenderDrawColor ( pGame->pRenderer, 0, 0, 0, 255 );
-            SDL_RenderClear ( pGame->pRenderer );
             if (pGame->event.type == SDL_QUIT)
             {
                 pGame->state = QUIT;
             }
             if (pGame->event.type == SDL_KEYDOWN)
             {
-                textInput ( pGame->event, nameBuffer );
-                if (pGame->event.key.keysym.sym == SDLK_RETURN && strlen ( nameBuffer ) >= 1)
+                textInput ( pGame->event, pGame->player.name );
+                if (pGame->event.key.keysym.sym == SDLK_RETURN && strlen ( pGame->player.name ) >= 1)
                 {
                     pGame->state = MENU;
-                    insertScore ( &pGame->highscores, nameBuffer, pGame->score );
+                    insertScore ( &pGame->highscores, pGame->player);
                     if (!saveHighscoresTxt ( &pGame->highscores ))
                         printfd ( "ERROR SAVING FILE\n" );
                     pGame->highscores.size = 0;
-                    nameBuffer[0] = '\0';
+                    
 
                     if (!loadHighscoresTxt ( &pGame->highscores ))
                         printfd ( "ERROR LOADING FILE\n" );
@@ -294,16 +302,16 @@ void gameOverView ( Game* pGame )
         // showText(pGame->pRenderer, White, FONT_SIZE, gameOverRect, true, "GAME OVER");
 
         // showText(pGame->pRenderer, White, FONT_SIZE, scoreRect, true, "Score: %d", pGame->score);
-        showText ( pGame->pScoreText, pGame->score );
+        showText ( pGame->pScoreText, pGame->player.score );
 
         // showText(pGame->pRenderer, White, FONT_SIZE, nameinputRect, true, nameBuffer);
-        showText ( pGame->pNameText, nameBuffer );
+        showText ( pGame->pNameText, pGame->player.name );
 
         SDL_RenderPresent ( pGame->pRenderer );
         SDL_Delay ( 1000 / FPS );
     }
 }
-void mainMenuView ( Game* pGame)
+void mainMenuView ( Game* pGame )
 {
     SDL_Rect startButtonRect = center ( pGame->pStartText->rect );
     SDL_Rect scoreboardRect = { 10,100 };
@@ -324,7 +332,8 @@ void mainMenuView ( Game* pGame)
             if (pGame->event.button.state == SDL_PRESSED && pointRectCollision ( mouseX, mouseY, startButtonRect ))
             {
                 printfd ( "PRESSED\n" );
-                pGame->level = level;
+                pGame->player.startingLevel = level;
+                pGame->player.level = pGame->player.startingLevel;
                 pGame->state = PLAY;
             }
             if (pGame->event.type == SDL_QUIT)
@@ -343,7 +352,7 @@ void mainMenuView ( Game* pGame)
                 }
             }
         }
-        displayScoreboard ( pGame->highscores, pGame->pRenderer, scoreboardRect );
+        displayScoreboard ( pGame->highscores,pGame->player, pGame->pRenderer, scoreboardRect );
         showText ( pGame->pTetrisText );
         showText ( pGame->pStartingLevelText, level );
         SDL_SetRenderDrawColor ( pGame->pRenderer, 0, 200, 0, 255 );

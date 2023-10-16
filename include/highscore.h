@@ -5,7 +5,11 @@
 typedef struct 
 {
 	char name[4];
-	int value;
+	int score;
+    int level;
+    int lines;
+    int startingLevel;
+    bool passedThreshold;
 } Score_t;
 
 typedef struct {
@@ -15,7 +19,8 @@ typedef struct {
     Text_t *pScoreText;
 } Highscores_t;
 
-Score_t createScore(char name[],int score);
+Score_t createScore(char name[],int score,int level,int lines,int startingLevel);
+char* scoreToString(Score_t score);
 void createHighscoresTxtFile();
 bool saveHighscoresTxt(Highscores_t *highscores);
 bool loadHighscoresTxt(Highscores_t *highscores);
@@ -25,9 +30,9 @@ bool saveHighscoresBin(Highscores_t *highscores);
 bool loadHighscoresBin(Highscores_t *highscores);
 
 void sortScores(Highscores_t *highscores);
-bool insertScore(Highscores_t *highscores, char name[], int score);
+bool insertScore(Highscores_t *highscores, Score_t score);
 
 void swapScore(Score_t *A,Score_t *B);
 
-void displayScoreboard(Highscores_t highscore,SDL_Renderer* pRenderer,SDL_Rect position);
+void displayScoreboard(Highscores_t highscore,Score_t player,SDL_Renderer* pRenderer,SDL_Rect position);
 #endif

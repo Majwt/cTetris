@@ -33,7 +33,7 @@ void Move(Board *pBoard, int dx,int dy);
 bool Rotation(Board *pBoard, int direction);
 
 void ConvertToStatic(Board *pBoard);
-void NextRound(Board *pBoard, int *score, int *level, int *lines);
+void NextRound(Board *pBoard,Score_t *player);
 bool isTetrominoOnGround(Board *pBoard);
 int AddPoints(int level, int lines);
 int RemoveAllCompleteRows(Board *pBoard);

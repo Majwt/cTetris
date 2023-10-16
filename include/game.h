@@ -27,9 +27,7 @@ struct game
     SDL_Event event;
 	Board *pBoard;
 	Highscores_t highscores;
-	int score;
-	int level;
-	int lines;
+    Score_t player;
 	int gravity;
 	GameState state;
     Text_t *pTetrisText;

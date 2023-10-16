@@ -1,6 +1,7 @@
 #include <SDL.h>
 #include "defines.h"
 #include "standard.h"
+#include "highscore.h"
 #include "text.h"
 #include "tetromino.h"
 #include "board.h"
@@ -368,9 +369,17 @@ bool isTetrominoOnGround(Board *pBoard)
 	UpdateOnGroundTime(pBoard);
 	return (pBoard->onGround && pBoard->onGroundTime > ONGROUND_TIME_MIN);
 }
-
-void NextRound(Board *pBoard, int *pScore, int *pLevel, int *pLines)
+int max ( int a, int b )
 {
+    if (a > b)
+    {
+        return a;
+    }
+    return b;
+}
+void NextRound(Board *pBoard, Score_t *player)
+{
+    static int clearCounter = 0;
 	ConvertToStatic(pBoard);
 	pBoard->activeTetromino = pBoard->nextTetromino;
 	RandomPiece(&pBoard->nextTetromino);
@@ -378,15 +387,23 @@ void NextRound(Board *pBoard, int *pScore, int *pLevel, int *pLines)
 	pBoard->nextTetromino = CreatePiece(DEBUG_PIECEID);
 #endif
 	int linesCleared = ClearCompleteRows(pBoard);
-	*pScore += AddPoints(*pLevel, linesCleared);
-	*pLines += linesCleared;
-	if (*pLines > 1 && *pLines % 5 == 0)
-	{
-		*pLevel += 1;
-
-		printfd("Level UP: ");
-		printfd("%d\n", *pLevel);
-	}
+    player->score += AddPoints(player->level, linesCleared);
+    player->lines += linesCleared;
+    clearCounter += linesCleared;
+    if (player->passedThreshold && clearCounter >= 10) {
+        player->level += 1;
+        printfd("level up after 10\n");
+    }
+    else if (!player->passedThreshold && (player->lines > player->startingLevel*10 + 10 || player->lines > max(100,player->startingLevel*10-50)))
+    {   
+        printfd("reached threshold\n");
+        player->level += 1;
+        player->passedThreshold = true;
+    }
+    if (!player->passedThreshold || clearCounter >= 10) {
+        clearCounter = 0;
+    }
+    
 	pBoard->onGround = false;
 }
 void UpdateOnGroundTime(Board *pBoard)
