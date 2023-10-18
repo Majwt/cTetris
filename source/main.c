@@ -7,7 +7,7 @@ int main(int argv, char **args)
 {
     srand(time(NULL));
 	rand();
-	Game g = {0};
+	Game_t g = {0};
 	if (!initGame(&g))
 		return 1;
 	while (g.state != QUIT)

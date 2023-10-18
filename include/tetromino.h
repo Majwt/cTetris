@@ -14,11 +14,11 @@ typedef struct tetromino
 	int orientations[4][4][4];
 	int srsTests[8][5][2];
     enum pieceType type;
-} Tetromino;
+} Tetromino_t;
 
-Tetromino CreatePiece(int n);
-void fillTetrinoOrientation(Tetromino *pTetromino, int orientation[4][4][4]);
-void RandomPiece(Tetromino *piece);
+Tetromino_t createPiece(int n);
+void fillTetrinoOrientation(Tetromino_t *pTetromino, int orientation[4][4][4]);
+void randomPiece(Tetromino_t *piece);
 int getSRSindex(int from, int to);
 void copySRS(int in[8][5][2],int out[8][5][2]);
 

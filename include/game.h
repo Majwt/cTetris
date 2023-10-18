@@ -25,7 +25,7 @@ struct game
 	SDL_Window *pWindow;
 	SDL_Renderer *pRenderer;
     SDL_Event event;
-	Board *pBoard;
+	Board_t *pBoard;
 	Highscores_t highscores;
     Score_t player;
 	int gravity;
@@ -39,18 +39,18 @@ struct game
     const uint8_t *keysPressed;
     
 };
-typedef struct game Game;
+typedef struct game Game_t;
 
 
-int initGame(Game *pGame);
-void runGame(Game *pGame);
-void closeGame(Game *pGame);
+int initGame(Game_t *pGame);
+void runGame(Game_t *pGame);
+void closeGame(Game_t *pGame);
 
-void handleInput(Game *pGame);
-void initBoard(Game *pGame);
-void mainMenuView(Game *pGame);
-void drawGameUI(Game *pGame);
-void gameOverView(Game *pGame);
+void handleEvents(Game_t *pGame);
+void handleInput(Game_t *pGame);
+void initBoard(Game_t *pGame);
+void mainMenuView(Game_t *pGame);
+void gameOverView(Game_t *pGame);
 
 
 

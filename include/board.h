@@ -2,7 +2,7 @@
 #define board_h
 #include <stdbool.h>
 
-typedef struct board Board;
+typedef struct board Board_t;
 
 struct board
 {
@@ -11,8 +11,8 @@ struct board
 	SDL_Renderer *pRenderer;
 	int occupied[BOARD_ROWS][BOARD_COLUMNS];
 	SDL_Color colors[7];
-	Tetromino activeTetromino;
-	Tetromino nextTetromino;
+	Tetromino_t activeTetromino;
+	Tetromino_t nextTetromino;
 	double onGroundTime;
 	bool onGround;
 	double now_t, prev_t;
@@ -22,22 +22,24 @@ struct board
     Text_t *pNextText;
 };
 
-Board *CreateBoard(SDL_Renderer *pRenderer);
-void DrawOccupied(Board *board);
-void DrawTetromino(Board *pBoard);
-int TetrominoCollisionCheck(Board *pBoard,int offsetX,int offsetY, int orientation);
+Board_t *CreateBoard(SDL_Renderer *pRenderer);
+void DrawOccupied(Board_t *board);
+void drawTetromino(Board_t *pBoard);
+void drawBoard(Board_t* pBoard, Score_t* player);
 
-void UpdateOnGroundTime(Board *pBoard);
+int TetrominoCollisionCheck(Board_t *pBoard,int offsetX,int offsetY, int orientation);
 
-void Move(Board *pBoard, int dx,int dy);
-bool Rotation(Board *pBoard, int direction);
+void updateOnGroundTime(Board_t *pBoard);
 
-void ConvertToStatic(Board *pBoard);
-void NextRound(Board *pBoard,Score_t *player);
-bool isTetrominoOnGround(Board *pBoard);
-int AddPoints(int level, int lines);
-int RemoveAllCompleteRows(Board *pBoard);
-void MoveRowsDown1(Board *pBoard, int y);
-void ShowNextPiece(Board *pBoard, int x, int y);
-bool GameOverCheck(Board *pBoard);
+void movePiece(Board_t *pBoard, int dx,int dy);
+bool rotatePiece(Board_t *pBoard, int direction);
+
+void convertToStatic(Board_t *pBoard);
+void beginNextRound(Board_t *pBoard,Score_t *player);
+bool isTetrominoOnGround(Board_t *pBoard);
+int addPoints(int level, int lines);
+int RemoveAllCompleteRows(Board_t *pBoard);
+void MoveRowsDown1(Board_t *pBoard, int y);
+void showNextPiece(Board_t *pBoard, int x, int y);
+bool gameOverCheck(Board_t *pBoard);
 #endif
