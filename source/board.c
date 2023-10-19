@@ -368,14 +368,7 @@ bool isTetrominoOnGround(Board_t* pBoard)
     updateOnGroundTime(pBoard);
     return (pBoard->onGround && pBoard->onGroundTime > ONGROUND_TIME_MIN);
 }
-int max(int a, int b)
-{
-    if(a > b)
-    {
-        return a;
-    }
-    return b;
-}
+
 
 void beginNextRound(Board_t* pBoard, Score_t* player)
 {

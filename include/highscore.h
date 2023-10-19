@@ -39,5 +39,5 @@ bool insertScore(Highscores_t* highscores, Score_t score);
 
 void swapScore(Score_t* A, Score_t* B);
 
-void displayScoreboard(Highscores_t highscore, Score_t player, SDL_Renderer* pRenderer, SDL_Rect position);
+void displayScoreboard(Highscores_t highscore, Score_t player);
 #endif

@@ -64,6 +64,9 @@ Text_t* initText(const char* path_to_font, int fontsize, SDL_Renderer* pRenderer
 // }
 void drawText(Text_t* pText)
 {
+    if (pText == NULL) {
+        return;
+    }
     if(strlen(pText->printString) == 0)
     {
         return;

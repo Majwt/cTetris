@@ -22,8 +22,8 @@ Highscores_t initHighscore(SDL_Renderer* pRenderer, SDL_Rect position)
     Highscores_t highscores;
 
     highscores.size = 0;
-    highscores.pHighscoreText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf", 15, NULL, (SDL_Rect) { 0, 0, 0, 0 }, White, true, "HIGHSCORES");
-    highscores.pScoreText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf", 12, NULL, (SDL_Rect) { 0, 0, 0, 0 }, White, false, "%3s %-7d");
+    highscores.pHighscoreText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf", 15, pRenderer, position, White, false, "HIGHSCORES");
+    highscores.pScoreText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf", 12, pRenderer, position, White, false, "%3s %-7d");
     highscores.pRenderer = pRenderer;
     highscores.position = position;
     return highscores;
@@ -125,11 +125,9 @@ void swapScore(Score_t* A, Score_t* B)
     *A = *B;
     *B = tmp;
 }
-void displayScoreboard(Highscores_t highscore, Score_t player, SDL_Renderer* pRenderer, SDL_Rect position)
+void displayScoreboard(Highscores_t highscore, Score_t player)
 {
 
-    highscore.pHighscoreText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf", 15, pRenderer, position, White, true, "HIGHSCORES");
-    highscore.pScoreText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf", 12, pRenderer, position, White, false, "%3s %-7d");
     if(player.score >= 0 && strcmp(player.name, "YOU") == 0 && highscore.size <= HIGHSCORE_MAX_SAVES)
     {
         highscore.scores[highscore.size] = player;
@@ -141,10 +139,13 @@ void displayScoreboard(Highscores_t highscore, Score_t player, SDL_Renderer* pRe
         highscore.scores[highscore.size - 1] = player;
         sortScores(&highscore);
     }
-
+    if (!highscore.pHighscoreText || !highscore.pScoreText) {
+        printfd("highscore text is null\n");
+        return;
+    }
     drawText(highscore.pHighscoreText);
-    highscore.pScoreText->rect.x = position.x;
-    highscore.pScoreText->rect.y = position.y;
+    highscore.pScoreText->rect.x = highscore.pHighscoreText->rect.x;
+    highscore.pScoreText->rect.y = highscore.pHighscoreText->rect.y+10;
     for(int i = 0; i < highscore.size; i++)
     {
         if(highscore.scores[i].score >= 0)

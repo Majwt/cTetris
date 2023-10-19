@@ -11,5 +11,9 @@
 
 void printfd(const char* format, ...);
 int modneg(int a, int b);
+bool xor (bool a, bool b);
+int min(int a, int b);
+int max(int a, int b);
+
 
 #endif

@@ -1,14 +1,10 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 
-#include "defines.h"
 #include "standard.h"
-#include "math.h"
-#include "highscore.h"
-#include "text.h"
-#include "tetromino.h"
-#include "board.h"
 #include "game.h"
+
+#define FPS 60
 
 bool pointRectCollision(int x, int y, SDL_Rect rect)
 {
@@ -19,19 +15,6 @@ SDL_Rect center(SDL_Rect rect)
     rect.x -= rect.w / 2;
     rect.y -= rect.h / 2;
     return rect;
-}
-bool xor (bool a, bool b)
-{
-    return (a || b) && !(a && b);
-}
-
-int min(int a, int b)
-{
-    if(a < b)
-    {
-        return a;
-    }
-    return b;
 }
 
 int initGame(Game_t* pGame)
@@ -173,7 +156,7 @@ void runGame(Game_t* pGame)
         }
         drawBoard(pGame->pBoard, &pGame->player);
         SDL_Rect scoreboardRect = { 10,100 };
-        displayScoreboard(pGame->highscores, pGame->player, pGame->pRenderer, scoreboardRect);
+        displayScoreboard(pGame->highscores, pGame->player);
 
         SDL_RenderPresent(pGame->pRenderer);
         SDL_Delay(1000 / FPS);
@@ -230,7 +213,7 @@ void mainMenuView(Game_t* pGame)
         SDL_SetRenderDrawColor(pGame->pRenderer, 0, 200, 0, 255);
         SDL_RenderFillRect(pGame->pRenderer, &startButtonRect);
 
-        displayScoreboard(pGame->highscores, pGame->player, pGame->pRenderer, scoreboardRect);
+        displayScoreboard(pGame->highscores, pGame->player);
         drawText(pGame->pTetrisText);
         drawText(pGame->pStartingLevelText);
         drawText(pGame->pStartText);

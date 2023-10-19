@@ -16,3 +16,24 @@ void printfd(const char* format, ...) {
 	va_end(ap);
 	#endif
 }
+bool xor (bool a, bool b)
+{
+    return (a || b) && !(a && b);
+}
+
+int min(int a, int b)
+{
+    if(a < b)
+    {
+        return a;
+    }
+    return b;
+}
+int max(int a, int b)
+{
+    if(a > b)
+    {
+        return a;
+    }
+    return b;
+}

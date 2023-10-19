@@ -1,8 +1,6 @@
 #ifndef defines_h
 #define defines_h
 
-#define FPS 60
-
 
 #define DEBUG 1
 #define DEBUG_BOARD 0
