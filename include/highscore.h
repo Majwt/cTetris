@@ -4,7 +4,7 @@
 
 typedef struct
 {
-    char name[4];
+    char name[HIGHSCORE_NAME_MAX_LENGTH];
     int score;
     int level;
     int lines;

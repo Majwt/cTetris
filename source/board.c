@@ -8,7 +8,7 @@
 
 
 
-Board_t* CreateBoard(SDL_Renderer* pRenderer)
+Board_t* createBoard(SDL_Renderer* pRenderer)
 {
     Board_t* board = malloc(sizeof(struct board));
     board->pRenderer = pRenderer;
@@ -93,16 +93,12 @@ Board_t* CreateBoard(SDL_Renderer* pRenderer)
     rightside.y += 100;
     board->pLevelText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf", FONT_SIZE, board->pRenderer, rightside, White, false, "Level:\n%4d");
 
-#if DEBUG_BOARD
-    printf("setting non random piece %d\n", DEBUG_PIECEID);
-    board->activeTetromino = createPiece(DEBUG_PIECEID);
-    board->nextTetromino = createPiece(DEBUG_PIECEID);
-#endif
+
 
     return board;
 }
 
-void DrawOccupied(Board_t* pBoard)
+void drawOccupied(Board_t* pBoard)
 {
     SDL_Surface* surface;
     SDL_Rect rect;
@@ -148,16 +144,15 @@ void DrawOccupied(Board_t* pBoard)
 /// @param pTetromino
 /// @param pBoard
 /// @return 1 if collision is detected, else 0
-int TetrominoCollisionCheck(Board_t* pBoard, int offsetX, int offsetY, int orientation)
+int tetrominoCollisionCheck(Board_t* pBoard, Tetromino_t piece, int offsetX, int offsetY, int orientation)
 {
-
     for(int y = 0; y < 4; y++)
     {
         for(int x = 0; x < 4; x++)
         {
-            int activeTetrominoBlockValue = pBoard->activeTetromino.orientations[orientation][y][x];
-            int boardBlockX = pBoard->activeTetromino.x + x + offsetX;
-            int boardBlockY = pBoard->activeTetromino.y + y + offsetY;
+            int activeTetrominoBlockValue = piece.orientations[orientation][y][x];
+            int boardBlockX = piece.x + x + offsetX;
+            int boardBlockY = piece.y + y + offsetY;
             if(boardBlockY < 0 || boardBlockX < 0 || boardBlockX >= BOARD_COLUMNS || boardBlockY >= BOARD_ROWS)
             {
                 if(activeTetrominoBlockValue > 0)
@@ -167,7 +162,7 @@ int TetrominoCollisionCheck(Board_t* pBoard, int offsetX, int offsetY, int orien
                 continue;
             }
             int boardBlockValue = pBoard->occupied[boardBlockY][boardBlockX];
-            if(activeTetrominoBlockValue > 0 && boardBlockValue != 0 && boardBlockValue < 10)
+            if(activeTetrominoBlockValue > 0 && boardBlockValue != 0)
             {
                 return 1;
             }
@@ -177,23 +172,42 @@ int TetrominoCollisionCheck(Board_t* pBoard, int offsetX, int offsetY, int orien
 }
 void drawTetromino(Board_t* pBoard)
 {
-    // bool hit = TetrominoCollisionCheck(pBoard, 0, 0, pBoard->activeTetromino.orientationIndex);
-    SDL_Rect rect;
-    rect.h = rect.w = TETROMINOSIZE;
+    SDL_Rect rect, ghostRect;
+    rect.h = rect.w = ghostRect.h = ghostRect.w = TETROMINOSIZE;
     Tetromino_t* piece = &pBoard->activeTetromino;
+
+    Tetromino_t ghostPiece = pBoard->activeTetromino;
+
+    while(!tetrominoCollisionCheck(pBoard, ghostPiece, 0, 1, ghostPiece.orientationIndex) && ghostPiece.y < BOARD_ROWS+10)
+    {
+        ghostPiece.y++;
+    }
     for(int y = 0; y < 4; y++)
     {
         for(int x = 0; x < 4; x++)
         {
             rect.x = pBoard->x + (piece->x + x) * TETROMINOSIZE;
             rect.y = pBoard->y + (piece->y + y) * TETROMINOSIZE;
+            ghostRect.x = pBoard->x + (ghostPiece.x + x) * TETROMINOSIZE;
+            ghostRect.y = pBoard->y + (ghostPiece.y + y) * TETROMINOSIZE;
             bool bounds = rect.y < 0 || rect.x < 0 || rect.x >= BOARD_COLUMNS || rect.y >= BOARD_ROWS;
+            bool ghostbounds = ghostRect.y < 0 || ghostRect.x < 0 || ghostRect.x >= BOARD_COLUMNS || ghostRect.y >= BOARD_ROWS;
             int value = piece->orientations[piece->orientationIndex][y][x];
-            if(bounds && value > 0)
+            if(value > 0)
             {
                 SDL_Color color = pBoard->colors[value - 1];
-                SDL_SetRenderDrawColor(pBoard->pRenderer, color.r, color.g, color.b, color.a);
-                SDL_RenderFillRect(pBoard->pRenderer, &rect);
+
+                if(ghostbounds)
+                {
+                    SDL_SetRenderDrawBlendMode(pBoard->pRenderer, SDL_BLENDMODE_BLEND);
+                    SDL_SetRenderDrawColor(pBoard->pRenderer, color.r, color.g, color.b, 200);
+                    SDL_RenderFillRect(pBoard->pRenderer, &ghostRect);
+                }
+                if(bounds)
+                {
+                    SDL_SetRenderDrawColor(pBoard->pRenderer, color.r, color.g, color.b, color.a);
+                    SDL_RenderFillRect(pBoard->pRenderer, &rect);
+                }
             }
         }
     }
@@ -208,9 +222,22 @@ void drawTetromino(Board_t* pBoard)
     SDL_RenderDrawLine(pBoard->pRenderer, pieceX + pieceWidth, pieceY + pieceWidth, pieceX, pieceY + pieceWidth);
 #endif
 }
+
+void hardDrop(Board_t *pBoard) {
+    Tetromino_t* piece = &pBoard->activeTetromino;
+
+
+    while(!tetrominoCollisionCheck(pBoard, *piece, 0, 1, piece->orientationIndex) && piece->y < BOARD_ROWS+10)
+    {
+        piece->y++;
+    }
+    pBoard->onGround = true;
+    pBoard->onGroundTime = 1;
+    printfd("Hard drop\n");
+}
 void movePiece(Board_t* pBoard, int dx, int dy)
 {
-    if(!TetrominoCollisionCheck(pBoard, dx, dy, pBoard->activeTetromino.orientationIndex))
+    if(!tetrominoCollisionCheck(pBoard, pBoard->activeTetromino, dx, dy, pBoard->activeTetromino.orientationIndex))
     {
         if(dx)
         {
@@ -256,7 +283,7 @@ bool rotatePiece(Board_t* pBoard, int direction)
     {
         int srsX = pBoard->activeTetromino.srsTests[srsIndex][i][0];
         int srsY = pBoard->activeTetromino.srsTests[srsIndex][i][1];
-        bool success = TetrominoCollisionCheck(pBoard, srsX, -srsY, newOrientation) == 0;
+        bool success = tetrominoCollisionCheck(pBoard, pBoard->activeTetromino, srsX, -srsY, newOrientation) == 0;
         printfd("test %d: %-7s (%d,%d)\n", i + 1, (success) ? "success" : "fail", srsX, srsY);
         if(success)
         {
@@ -375,9 +402,6 @@ void beginNextRound(Board_t* pBoard, Score_t* player)
     convertToStatic(pBoard);
     pBoard->activeTetromino = pBoard->nextTetromino;
     randomPiece(&pBoard->nextTetromino);
-#if DEBUG_BOARD
-    pBoard->nextTetromino = createPiece(DEBUG_PIECEID);
-#endif
     int linesCleared = clearCompleteRows(pBoard);
 
     player->score += addPoints(player->level, linesCleared);
@@ -421,12 +445,12 @@ void updateOnGroundTime(Board_t* pBoard)
 }
 bool gameOverCheck(Board_t* pBoard)
 {
-    bool test = pBoard->activeTetromino.y < 1 && TetrominoCollisionCheck(pBoard, 0, 0, pBoard->activeTetromino.orientationIndex);
+    bool test = pBoard->activeTetromino.y < 1 && tetrominoCollisionCheck(pBoard, pBoard->activeTetromino, 0, 0, pBoard->activeTetromino.orientationIndex);
     return test;
 }
 void drawBoard(Board_t* pBoard, Score_t* player)
 {
-    DrawOccupied(pBoard);
+    drawOccupied(pBoard);
     drawTetromino(pBoard);
     updateText(pBoard->pLinesText, player->lines);
     SDL_Rect rect = updateText(pBoard->pScoreText, player->score);

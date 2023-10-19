@@ -22,12 +22,13 @@ struct board
     Text_t *pNextText;
 };
 
-Board_t *CreateBoard(SDL_Renderer *pRenderer);
-void DrawOccupied(Board_t *board);
+Board_t *createBoard(SDL_Renderer *pRenderer);
+void drawOccupied(Board_t *board);
 void drawTetromino(Board_t *pBoard);
 void drawBoard(Board_t* pBoard, Score_t* player);
 
-int TetrominoCollisionCheck(Board_t *pBoard,int offsetX,int offsetY, int orientation);
+int tetrominoCollisionCheck(Board_t *pBoard,Tetromino_t piece,int offsetX,int offsetY, int orientation);
+void hardDrop(Board_t *pBoard);
 
 void updateOnGroundTime(Board_t *pBoard);
 
@@ -38,8 +39,8 @@ void convertToStatic(Board_t *pBoard);
 void beginNextRound(Board_t *pBoard,Score_t *player);
 bool isTetrominoOnGround(Board_t *pBoard);
 int addPoints(int level, int lines);
-int RemoveAllCompleteRows(Board_t *pBoard);
-void MoveRowsDown1(Board_t *pBoard, int y);
+int removeAllCompleteRows(Board_t *pBoard);
+void shiftRowsDown(Board_t *pBoard, int y);
 void showNextPiece(Board_t *pBoard, int x, int y);
 bool gameOverCheck(Board_t *pBoard);
 #endif

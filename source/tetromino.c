@@ -187,6 +187,9 @@ Tetromino_t createPiece(int n)
 void randomPiece(Tetromino_t* piece)
 {
     *piece = createPiece(rand() % 7);
+#if DEBUG_PIECEID
+    *piece = createPiece(DEBUG_PIECEID - 1);
+#endif
 }
 int getSRSindex(int from, int to)
 {

@@ -50,7 +50,7 @@ int initGame(Game_t* pGame)
     pGame->pGameOverText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf", FONT_SIZE, pGame->pRenderer, (SDL_Rect) { WINDOW_WIDTH / 2, 50 }, White, true, "GAME OVER");
     pGame->pNameText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf", FONT_SIZE, pGame->pRenderer, (SDL_Rect) { WINDOW_WIDTH / 2, 250 }, White, true, "TYPE NAME:\n    %3s");
     pGame->pTetrisText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf", FONT_SIZE, pGame->pRenderer, (SDL_Rect) { WINDOW_WIDTH / 2, 50 }, White, true, "TETRIS");
-    pGame->pStartingLevelText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf", 10, pGame->pRenderer, (SDL_Rect) { WINDOW_WIDTH / 2, 100 }, White, true, "STARTING LEVEL: %2d");
+    pGame->pStartingLevelText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf", 12, pGame->pRenderer, (SDL_Rect) { WINDOW_WIDTH / 2, 100 }, White, true, "STARTING LEVEL: %2d");
     pGame->pStartText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf", FONT_SIZE, pGame->pRenderer, startButtonRect, White, true, "START");
     if(!pGame->pTetrisText || !pGame->pStartingLevelText)
     {
@@ -83,7 +83,7 @@ void initBoard(Game_t* pGame)
     {
         free(pGame->pBoard);
     }
-    pGame->pBoard = CreateBoard(pGame->pRenderer);
+    pGame->pBoard = createBoard(pGame->pRenderer);
     pGame->pBoard->onGround = false;
     pGame->pBoard->onGroundTime = 0;
     pGame->player.score = 0;
@@ -122,7 +122,7 @@ void runGame(Game_t* pGame)
 
     int frameCounter = 0;
 
-    const int framesPerFall[29] = { 48,43,38,33,28,23,18,13,8,6,5,5,5,4,4,4,3,3,3,2,2,2,2,2,2,2,2,2,1,1 };
+    const int framesPerFall[29] = { 48,43,38,33,28,23,18,13,8,6,5,5,5,4,4,4,3,3,3,2,2,2,2,2,2,2,2,2,1 };
     pGame->gravity = pGame->player.startingLevel;
     while(pGame->state == PLAY)
     {
@@ -315,6 +315,13 @@ void handleInput(Game_t* pGame)
     if(pGame->keysPressed[SDL_SCANCODE_L])
     {
         pGame->player.level += 1;
+    }
+    if(pGame->keysPressed[SDL_SCANCODE_ESCAPE])
+    {
+        pGame->state = MENU;
+    }
+    if (pGame->keysPressed[SDL_SCANCODE_B]) {
+        hardDrop(pGame->pBoard);
     }
     if(pGame->keysPressed[SDL_SCANCODE_SPACE] && pGame->pBoard->onGround == false && pGame->player.level < 29)
     {

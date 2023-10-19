@@ -36,32 +36,6 @@ Text_t* initText(const char* path_to_font, int fontsize, SDL_Renderer* pRenderer
     return pText;
 }
 
-
-
-// SDL_Rect drawText ( SDL_Renderer* pRenderer, SDL_Color color, int fontsize, SDL_Rect rect, bool centered, const char* text, ... )
-// {
-//     TTF_Font* font = initText ( "./assets/BigBlueTermPlusNerdFont-Regular.ttf", fontsize );
-//     if (strlen ( text ) > 0)
-//     {
-//         va_list ap;
-//         va_start ( ap, text );
-//         char buffer[100];
-//         vsprintf ( buffer, text, ap );
-//         TTF_SetFontSize ( font, fontsize );
-//         SDL_Surface* surface = TTF_RenderText_Solid ( font, buffer, color );
-//         SDL_Texture* texture = SDL_CreateTextureFromSurface ( pRenderer, surface );
-//         rect.w = surface->w;
-//         rect.h = surface->h;
-//         if (centered)
-//         {
-//             rect.x -= rect.w / 2;
-//         }
-//         SDL_FreeSurface ( surface );
-//         SDL_RenderCopy ( pRenderer, texture, NULL, &rect );
-//         SDL_DestroyTexture ( texture );
-//     }
-//     return rect;
-// }
 void drawText(Text_t* pText)
 {
     if (pText == NULL) {
@@ -123,7 +97,7 @@ void textInput(SDL_Event event, char buffer[])
 {
     const char* keyName = SDL_GetKeyName(event.key.keysym.sym);
     int bufferlen = strlen(buffer);
-    if(bufferlen < 3 && strlen(keyName) == 1 && keyName[0] >= 'A' && keyName[0] <= 'Z')
+    if(bufferlen < HIGHSCORE_NAME_MAX_LENGTH-1 && strlen(keyName) == 1 && keyName[0] >= 'A' && keyName[0] <= 'Z')
     {
         strcat(buffer, keyName);
     }

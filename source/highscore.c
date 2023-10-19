@@ -23,7 +23,7 @@ Highscores_t initHighscore(SDL_Renderer* pRenderer, SDL_Rect position)
 
     highscores.size = 0;
     highscores.pHighscoreText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf", 15, pRenderer, position, White, false, "HIGHSCORES");
-    highscores.pScoreText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf", 12, pRenderer, position, White, false, "%3s %-7d");
+    highscores.pScoreText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf", 12, pRenderer, position, White, false, "%*s %-7d");
     highscores.pRenderer = pRenderer;
     highscores.position = position;
     return highscores;
@@ -206,7 +206,7 @@ void displayScoreboard(Highscores_t highscore, Score_t* player)
         {
             highscore.pScoreText->color = (SDL_Color){ 0, 255, 0, 255 };
         }
-        highscore.pScoreText->rect.y += updateText(highscore.pScoreText, highscore.scores[i].name, highscore.scores[i].score).h + 10;
+        highscore.pScoreText->rect.y += updateText(highscore.pScoreText,HIGHSCORE_NAME_MAX_LENGTH, highscore.scores[i].name, highscore.scores[i].score).h + 10;
         drawText(highscore.pScoreText);
         highscore.pScoreText->color = White;
     }
