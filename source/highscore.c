@@ -32,21 +32,18 @@ Highscores_t initHighscore(SDL_Renderer* pRenderer, SDL_Rect position)
 void createHighscoresTxtFile()
 {
     printfd("CREATING HIGHSCORE FILE\n");
-    char filename[100] = HIGHSCORE_FILENAME;
-    strcat(filename, ".txt");
+    const char* filename = HIGHSCORE_FILENAME;
     printfd("filename: %s\n", filename);
     FILE* fp = fopen(filename, "wb");
     Highscores_t tmp;
     tmp.size = 0;
-    // fwrite ( &tmp, sizeof ( Highscores_t ), 1, fp );
     fclose(fp);
 }
 
 bool saveHighscoresTxt(Highscores_t* highscores)
 {
     sortScores(highscores);
-    char filename[100] = HIGHSCORE_FILENAME;
-    strcat(filename, ".txt");
+    const char* filename = HIGHSCORE_FILENAME;
     FILE* fp = fopen(filename, "w");
     if(fp == NULL)
     {
@@ -57,7 +54,9 @@ bool saveHighscoresTxt(Highscores_t* highscores)
     for(int i = 0; i < highscores->size; i++)
     {
         if(highscores->scores[i].score > 0)
+        {
             fprintf(fp, "%s\n", scoreToString(highscores->scores[i]));
+        }
     }
 
     fclose(fp);
@@ -67,8 +66,7 @@ bool saveHighscoresTxt(Highscores_t* highscores)
 bool loadHighscoresTxt(Highscores_t* highscores)
 {
 
-    char filename[100] = HIGHSCORE_FILENAME;
-    strcat(filename, ".txt");
+    const char* filename = HIGHSCORE_FILENAME;
     FILE* fp = fopen(filename, "r");
 
     if(fp == NULL)
@@ -105,18 +103,60 @@ void sortScores(Highscores_t* highscores)
         }
     }
 }
+/// @brief a>b
+/// @param a 
+/// @param b 
+/// @return true: a>b, false: a<b
+bool a_bigger(Score_t a, Score_t b)
+{
+
+    if(a.score > b.score)
+    {
+        return true;
+    }
+    else if(a.score == b.score)
+    {
+        if(a.level > b.level)
+        {
+            return true;
+        }
+        else if(a.level == b.level)
+        {
+            if(a.lines > b.lines)
+            {
+                return true;
+            }
+            else if(a.lines == b.lines)
+            {
+                if(a.startingLevel > b.startingLevel)
+                {
+                    return true;
+                }
+
+            }
+        }
+    }
+    return false;
+}
 bool insertScore(Highscores_t* highscores, Score_t score)
 {
 
-    if(highscores->size + 1 > HIGHSCORE_MAX_SAVES)
+    if(highscores->size + 1 >= HIGHSCORE_MAX_SAVES)
     {
-        return 1;
+        if(!a_bigger(score, highscores->scores[highscores->size - 1]))
+        {
+            return 1;
+        }
+        highscores->scores[highscores->size - 1] = score;
     }
+    else
+    {
+        highscores->scores[highscores->size] = score;
+        highscores->size++;
+    }
+    printfd("inserted: %d\n", highscores->size);
 
-    highscores->scores[highscores->size] = score;
     sortScores(highscores);
-    printfd("size: %d\n", highscores->size);
-    highscores->size++;
     return 0;
 }
 void swapScore(Score_t* A, Score_t* B)
@@ -125,42 +165,50 @@ void swapScore(Score_t* A, Score_t* B)
     *A = *B;
     *B = tmp;
 }
-void displayScoreboard(Highscores_t highscore, Score_t player)
+void displayScoreboard(Highscores_t highscore, Score_t* player)
 {
-
-    if(player.score >= 0 && strcmp(player.name, "YOU") == 0 && highscore.size <= HIGHSCORE_MAX_SAVES)
+    if(player)
     {
-        highscore.scores[highscore.size] = player;
-        highscore.size++;
+        if(strcmp(player->name, "YOU") == 0 && highscore.size <= HIGHSCORE_MAX_SAVES)
+        {
+            highscore.scores[highscore.size] = *player;
+            highscore.size++;
+        }
+        else if(a_bigger(*player, highscore.scores[highscore.size - 1]))
+        {
+            highscore.scores[highscore.size - 1] = *player;
+        }
         sortScores(&highscore);
     }
-    else if (player.score > highscore.scores[highscore.size - 1].score)
+    if(!highscore.pHighscoreText || !highscore.pScoreText)
     {
-        highscore.scores[highscore.size - 1] = player;
-        sortScores(&highscore);
-    }
-    if (!highscore.pHighscoreText || !highscore.pScoreText) {
         printfd("highscore text is null\n");
         return;
     }
     drawText(highscore.pHighscoreText);
     highscore.pScoreText->rect.x = highscore.pHighscoreText->rect.x;
-    highscore.pScoreText->rect.y = highscore.pHighscoreText->rect.y+10;
+    highscore.pScoreText->rect.y = highscore.pHighscoreText->rect.y + 10;
     for(int i = 0; i < highscore.size; i++)
     {
-        if(highscore.scores[i].score >= 0)
+        if(i == 0)
         {
-            if (highscore.scores[i].score == player.score && strcmp(highscore.scores[i].name, player.name) == 0)
-            {
-                highscore.pScoreText->color = (SDL_Color) { 255, 255, 0, 255 };
-            }
-            else
-            {
-                highscore.pScoreText->color = White;
-            }
-            highscore.pScoreText->rect.y += updateText(highscore.pScoreText, highscore.scores[i].name, highscore.scores[i].score).h + 10;
-            drawText(highscore.pScoreText);
+            highscore.pScoreText->color = (SDL_Color){ 255, 215, 0, 255 };
         }
+        else if(i == 1)
+        {
+            highscore.pScoreText->color = (SDL_Color){ 192, 192, 192, 255 };
+        }
+        else if(i == 2)
+        {
+            highscore.pScoreText->color = (SDL_Color){ 205, 127, 50, 255 };
+        }
+        if(player && highscore.scores[i].score == player->score && strcmp(highscore.scores[i].name, player->name) == 0)
+        {
+            highscore.pScoreText->color = (SDL_Color){ 0, 255, 0, 255 };
+        }
+        highscore.pScoreText->rect.y += updateText(highscore.pScoreText, highscore.scores[i].name, highscore.scores[i].score).h + 10;
+        drawText(highscore.pScoreText);
+        highscore.pScoreText->color = White;
     }
 
 }

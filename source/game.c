@@ -20,7 +20,6 @@ SDL_Rect center(SDL_Rect rect)
 int initGame(Game_t* pGame)
 {
 
-
     pGame->keysPressed = SDL_GetKeyboardState(NULL);
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
     {
@@ -123,7 +122,7 @@ void runGame(Game_t* pGame)
 
     int frameCounter = 0;
 
-    const int framesPerFall[30] = { 48,43,38,33,28,23,18,13,8,6,5,5,5,4,4,4,3,3,3,2,2,2,2,2,2,2,2,2,1,1 };
+    const int framesPerFall[29] = { 48,43,38,33,28,23,18,13,8,6,5,5,5,4,4,4,3,3,3,2,2,2,2,2,2,2,2,2,1,1 };
     pGame->gravity = pGame->player.startingLevel;
     while(pGame->state == PLAY)
     {
@@ -155,8 +154,7 @@ void runGame(Game_t* pGame)
             frameCounter = 0;
         }
         drawBoard(pGame->pBoard, &pGame->player);
-        SDL_Rect scoreboardRect = { 10,100 };
-        displayScoreboard(pGame->highscores, pGame->player);
+        displayScoreboard(pGame->highscores, &pGame->player);
 
         SDL_RenderPresent(pGame->pRenderer);
         SDL_Delay(1000 / FPS);
@@ -166,7 +164,6 @@ void runGame(Game_t* pGame)
 void gameOverView(Game_t* pGame)
 {
 
-    char nameBuffer[10] = "";
     pGame->player.name[0] = '\0';
     while(pGame->state == GAMEOVER)
     {
@@ -193,7 +190,6 @@ void gameOverView(Game_t* pGame)
 void mainMenuView(Game_t* pGame)
 {
     SDL_Rect startButtonRect = center(pGame->pStartText->rect);
-    SDL_Rect scoreboardRect = { 10,100 };
     int level = 0;
     int mouseX, mouseY;
 
@@ -213,7 +209,7 @@ void mainMenuView(Game_t* pGame)
         SDL_SetRenderDrawColor(pGame->pRenderer, 0, 200, 0, 255);
         SDL_RenderFillRect(pGame->pRenderer, &startButtonRect);
 
-        displayScoreboard(pGame->highscores, pGame->player);
+        displayScoreboard(pGame->highscores, NULL);
         drawText(pGame->pTetrisText);
         drawText(pGame->pStartingLevelText);
         drawText(pGame->pStartText);
