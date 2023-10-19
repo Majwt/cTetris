@@ -1,6 +1,7 @@
 #ifndef defines_h
 #define defines_h
 
+
 #define DEBUG 1
 #define DEBUG_BOARD 0
 #define DEBUG_PIECEID 0
