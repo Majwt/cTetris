@@ -28,7 +28,7 @@ common.o: $(SRCDIR)/common.c $(INCDIR)/common.h
 
 run: Tetris
 	./Tetris.out
-
+build: Tetris
 clean:
 	rm *.out
 	rm *.o

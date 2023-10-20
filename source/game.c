@@ -260,7 +260,6 @@ void handleEvents(Game_t* pGame)
 
                     if (!loadHighscoresTxt(&pGame->highscores))
                         printfd("ERROR LOADING FILE\n");
-
                 }
             }
         }
@@ -273,13 +272,22 @@ void handleEvents(Game_t* pGame)
             }
             if (pGame->event.type == SDL_KEYDOWN)
             {
-                if (pGame->event.key.keysym.sym == SDLK_UP && pGame->player.startingLevel < 29)
+                if (pGame->keysPressed[SDL_SCANCODE_UP] && pGame->player.startingLevel < 29)
                 {
                     pGame->player.startingLevel += 1;
                 }
-                if (pGame->event.key.keysym.sym == SDLK_DOWN && pGame->player.startingLevel > 0)
+                if (pGame->keysPressed[SDL_SCANCODE_DOWN] && pGame->player.startingLevel > 0)
                 {
                     pGame->player.startingLevel -= 1;
+                }
+                if (pGame->keysPressed[SDL_SCANCODE_RETURN])
+                {
+                    pGame->player.level = pGame->player.startingLevel;
+                    pGame->state = PLAY;
+                }
+                if (pGame->keysPressed[SDL_SCANCODE_ESCAPE])
+                {
+                    pGame->state = QUIT;
                 }
             }
         }
