@@ -7,8 +7,8 @@ INCDIR=./include
 CFLAGS = -g -I$(INCLUDE) -I$(INCDIR) -c 
 LDFLAGS = `sdl2-config --cflags --libs ` -lSDL2_image -lSDL2_ttf
 
-Tetris: main.o game.o tetromino.o board.o highscore.o text.o standard.o
-	$(CC) -o Tetris.out main.o game.o tetromino.o board.o highscore.o text.o standard.o $(LDFLAGS)
+Tetris: main.o game.o tetromino.o board.o highscore.o text.o common.o
+	$(CC) -o Tetris.out main.o game.o tetromino.o board.o highscore.o text.o common.o $(LDFLAGS)
 
 main.o: $(SRCDIR)/main.c
 	$(CC) $(CFLAGS) $(SRCDIR)/main.c
@@ -23,8 +23,8 @@ highscore.o: $(SRCDIR)/highscore.c $(INCDIR)/highscore.h
 	$(CC) $(CFLAGS) $(SRCDIR)/highscore.c
 text.o: $(SRCDIR)/text.c $(INCDIR)/text.h 
 	$(CC) $(CFLAGS) $(SRCDIR)/text.c
-standard.o: $(SRCDIR)/standard.c $(INCDIR)/standard.h 
-	$(CC) $(CFLAGS) $(SRCDIR)/standard.c
+common.o: $(SRCDIR)/common.c $(INCDIR)/common.h 
+	$(CC) $(CFLAGS) $(SRCDIR)/common.c
 
 run: Tetris
 	./Tetris.out

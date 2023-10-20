@@ -1,19 +1,19 @@
 
 #include "defines.h"
-#include "standard.h"
+#include "common.h"
 #include "text.h"
 
 const SDL_Color White = { 255, 255, 255, 255 };
 const SDL_Color Black = { 0,   0,   0, 255 };
 Text_t* initText(const char* path_to_font, int fontsize, SDL_Renderer* pRenderer, SDL_Rect rect, SDL_Color color, bool centered, const char* text)
 {
-    if(TTF_Init() == -1)
+    if (TTF_Init() == -1)
     {
         printfd("FONT ERROR\n");
         return 0;
     }
     TTF_Font* font = TTF_OpenFont(path_to_font, fontsize);
-    if(!font)
+    if (!font)
     {
         printfd("COULD NOT LOAD FONT\n");
         return NULL;
@@ -41,7 +41,7 @@ void drawText(Text_t* pText)
     if (pText == NULL) {
         return;
     }
-    if(strlen(pText->printString) == 0)
+    if (strlen(pText->printString) == 0)
     {
         return;
 
@@ -49,7 +49,7 @@ void drawText(Text_t* pText)
     SDL_Rect rect = pText->rect;
     rect.w = pText->pSurface->w;
     rect.h = pText->pSurface->h;
-    if(pText->centered)
+    if (pText->centered)
     {
         rect.x -= rect.w / 2;
         rect.y -= rect.h / 2;
@@ -60,9 +60,9 @@ void drawText(Text_t* pText)
 SDL_Rect updateText(Text_t* pText, ...)
 {
     TTF_SetFontSize(pText->font, pText->fontsize);
-    if(pText->pSurface)
+    if (pText->pSurface)
         SDL_FreeSurface(pText->pSurface);
-    if(pText->pSurface)
+    if (pText->pSurface)
         SDL_DestroyTexture(pText->pTexture);
     va_list args;
     va_start(args, pText);
@@ -74,21 +74,21 @@ SDL_Rect updateText(Text_t* pText, ...)
     SDL_Rect rect = pText->rect;
     rect.w = pText->pSurface->w;
     rect.h = pText->pSurface->h;
-    if(pText->centered)
+    if (pText->centered)
     {
         rect.x -= rect.w / 2;
         rect.y -= rect.h / 2;
     }
     return rect;
-// strcpy(pText->printString,buffer );
+    // strcpy(pText->printString,buffer );
 }
 void destroyText(Text_t* pText)
 {
-    if(pText->pSurface)
+    if (pText->pSurface)
         SDL_FreeSurface(pText->pSurface);
-    if(pText->pTexture)
+    if (pText->pTexture)
         SDL_DestroyTexture(pText->pTexture);
-    if(pText->font)
+    if (pText->font)
         TTF_CloseFont(pText->font);
     free(pText);
 }
@@ -97,11 +97,11 @@ void textInput(SDL_Event event, char buffer[])
 {
     const char* keyName = SDL_GetKeyName(event.key.keysym.sym);
     int bufferlen = strlen(buffer);
-    if(bufferlen < HIGHSCORE_NAME_MAX_LENGTH-1 && strlen(keyName) == 1 && keyName[0] >= 'A' && keyName[0] <= 'Z')
+    if (bufferlen < HIGHSCORE_NAME_MAX_LENGTH - 1 && strlen(keyName) == 1 && keyName[0] >= 'A' && keyName[0] <= 'Z')
     {
         strcat(buffer, keyName);
     }
-    if(strcmp(keyName, "Backspace") == 0 && bufferlen > 0)
+    if (strcmp(keyName, "Backspace") == 0 && bufferlen > 0)
     {
         int len = strlen(buffer);
         buffer[len - 1] = '\0';

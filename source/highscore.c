@@ -2,7 +2,7 @@
 #include <SDL_ttf.h>
 #include "text.h"
 #include "defines.h"
-#include "standard.h"
+#include "common.h"
 #include "highscore.h"
 
 Score_t createScore(char name[], int score, int level, int lines, int startingLevel)
@@ -45,15 +45,15 @@ bool saveHighscoresTxt(Highscores_t* highscores)
     sortScores(highscores);
     const char* filename = HIGHSCORE_FILENAME;
     FILE* fp = fopen(filename, "w");
-    if(fp == NULL)
+    if (fp == NULL)
     {
         printfd("Error opening file for writing.\n");
         return false;
     }
 
-    for(int i = 0; i < highscores->size; i++)
+    for (int i = 0; i < highscores->size; i++)
     {
-        if(highscores->scores[i].score > 0)
+        if (highscores->scores[i].score > 0)
         {
             fprintf(fp, "%s\n", scoreToString(highscores->scores[i]));
         }
@@ -69,19 +69,19 @@ bool loadHighscoresTxt(Highscores_t* highscores)
     const char* filename = HIGHSCORE_FILENAME;
     FILE* fp = fopen(filename, "r");
 
-    if(fp == NULL)
+    if (fp == NULL)
     {
         printfd("Error opening file for reading.\n");
         return false;
     }
 
     highscores->size = 0;
-    while(fscanf(fp, "%d %s %d %d %d",
-                 &highscores->scores[highscores->size].score,
-                 highscores->scores[highscores->size].name,
-                 &highscores->scores[highscores->size].level,
-                 &highscores->scores[highscores->size].lines,
-                 &highscores->scores[highscores->size].startingLevel) == 5 && highscores->size < HIGHSCORE_MAX_SAVES)
+    while (fscanf(fp, "%d %s %d %d %d",
+        &highscores->scores[highscores->size].score,
+        highscores->scores[highscores->size].name,
+        &highscores->scores[highscores->size].level,
+        &highscores->scores[highscores->size].lines,
+        &highscores->scores[highscores->size].startingLevel) == 5 && highscores->size < HIGHSCORE_MAX_SAVES)
     {
         highscores->size++;
     }
@@ -92,11 +92,11 @@ bool loadHighscoresTxt(Highscores_t* highscores)
 
 void sortScores(Highscores_t* highscores)
 {
-    for(int i = 0; i < highscores->size; i++)
+    for (int i = 0; i < highscores->size; i++)
     {
-        for(int j = 0; j < highscores->size - i - 1; j++)
+        for (int j = 0; j < highscores->size - i - 1; j++)
         {
-            if(highscores->scores[j].score < highscores->scores[j + 1].score)
+            if (highscores->scores[j].score < highscores->scores[j + 1].score)
             {
                 swapScore(&highscores->scores[j], &highscores->scores[j + 1]);
             }
@@ -110,25 +110,25 @@ void sortScores(Highscores_t* highscores)
 bool a_bigger(Score_t a, Score_t b)
 {
 
-    if(a.score > b.score)
+    if (a.score > b.score)
     {
         return true;
     }
-    else if(a.score == b.score)
+    else if (a.score == b.score)
     {
-        if(a.level > b.level)
+        if (a.level > b.level)
         {
             return true;
         }
-        else if(a.level == b.level)
+        else if (a.level == b.level)
         {
-            if(a.lines > b.lines)
+            if (a.lines > b.lines)
             {
                 return true;
             }
-            else if(a.lines == b.lines)
+            else if (a.lines == b.lines)
             {
-                if(a.startingLevel > b.startingLevel)
+                if (a.startingLevel > b.startingLevel)
                 {
                     return true;
                 }
@@ -141,9 +141,9 @@ bool a_bigger(Score_t a, Score_t b)
 bool insertScore(Highscores_t* highscores, Score_t score)
 {
 
-    if(highscores->size + 1 >= HIGHSCORE_MAX_SAVES)
+    if (highscores->size + 1 >= HIGHSCORE_MAX_SAVES)
     {
-        if(!a_bigger(score, highscores->scores[highscores->size - 1]))
+        if (!a_bigger(score, highscores->scores[highscores->size - 1]))
         {
             return 1;
         }
@@ -167,20 +167,20 @@ void swapScore(Score_t* A, Score_t* B)
 }
 void displayScoreboard(Highscores_t highscore, Score_t* player)
 {
-    if(player)
+    if (player)
     {
-        if(strcmp(player->name, "YOU") == 0 && highscore.size <= HIGHSCORE_MAX_SAVES)
+        if (strcmp(player->name, "YOU") == 0 && highscore.size <= HIGHSCORE_MAX_SAVES)
         {
             highscore.scores[highscore.size] = *player;
             highscore.size++;
         }
-        else if(a_bigger(*player, highscore.scores[highscore.size - 1]))
+        else if (a_bigger(*player, highscore.scores[highscore.size - 1]))
         {
             highscore.scores[highscore.size - 1] = *player;
         }
         sortScores(&highscore);
     }
-    if(!highscore.pHighscoreText || !highscore.pScoreText)
+    if (!highscore.pHighscoreText || !highscore.pScoreText)
     {
         printfd("highscore text is null\n");
         return;
@@ -188,25 +188,25 @@ void displayScoreboard(Highscores_t highscore, Score_t* player)
     drawText(highscore.pHighscoreText);
     highscore.pScoreText->rect.x = highscore.pHighscoreText->rect.x;
     highscore.pScoreText->rect.y = highscore.pHighscoreText->rect.y + 10;
-    for(int i = 0; i < highscore.size; i++)
+    for (int i = 0; i < highscore.size; i++)
     {
-        if(i == 0)
+        if (i == 0)
         {
-            highscore.pScoreText->color = (SDL_Color){ 255, 215, 0, 255 };
+            highscore.pScoreText->color = (SDL_Color) { 255, 215, 0, 255 };
         }
-        else if(i == 1)
+        else if (i == 1)
         {
-            highscore.pScoreText->color = (SDL_Color){ 192, 192, 192, 255 };
+            highscore.pScoreText->color = (SDL_Color) { 192, 192, 192, 255 };
         }
-        else if(i == 2)
+        else if (i == 2)
         {
-            highscore.pScoreText->color = (SDL_Color){ 205, 127, 50, 255 };
+            highscore.pScoreText->color = (SDL_Color) { 205, 127, 50, 255 };
         }
-        if(player && highscore.scores[i].score == player->score && strcmp(highscore.scores[i].name, player->name) == 0)
+        if (player && highscore.scores[i].score == player->score && strcmp(highscore.scores[i].name, player->name) == 0)
         {
-            highscore.pScoreText->color = (SDL_Color){ 0, 255, 0, 255 };
+            highscore.pScoreText->color = (SDL_Color) { 0, 255, 0, 255 };
         }
-        highscore.pScoreText->rect.y += updateText(highscore.pScoreText,HIGHSCORE_NAME_MAX_LENGTH, highscore.scores[i].name, highscore.scores[i].score).h + 10;
+        highscore.pScoreText->rect.y += updateText(highscore.pScoreText, HIGHSCORE_NAME_MAX_LENGTH, highscore.scores[i].name, highscore.scores[i].score).h + 10;
         drawText(highscore.pScoreText);
         highscore.pScoreText->color = White;
     }

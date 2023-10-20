@@ -1,5 +1,5 @@
-#ifndef standard_h
-#define standard_h
+#ifndef common_h
+#define common_h
 #include "defines.h"
 #include <stdio.h>
 #include <stdarg.h>

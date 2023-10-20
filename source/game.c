@@ -1,7 +1,7 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 
-#include "standard.h"
+#include "common.h"
 #include "game.h"
 
 #define FPS 60
@@ -21,20 +21,20 @@ int initGame(Game_t* pGame)
 {
 
     pGame->keysPressed = SDL_GetKeyboardState(NULL);
-    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
     {
         printfd("Error: %s\n", SDL_GetError());
         return 0;
     }
     pGame->pWindow = SDL_CreateWindow("Tetris", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
-    if(!pGame->pWindow)
+    if (!pGame->pWindow)
     {
         printfd("Error: %s\n", SDL_GetError());
         closeGame(pGame);
         return 0;
     }
     pGame->pRenderer = SDL_CreateRenderer(pGame->pWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if(!pGame->pRenderer)
+    if (!pGame->pRenderer)
     {
         printfd("Error: %s\n", SDL_GetError());
         closeGame(pGame);
@@ -52,7 +52,7 @@ int initGame(Game_t* pGame)
     pGame->pTetrisText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf", FONT_SIZE, pGame->pRenderer, (SDL_Rect) { WINDOW_WIDTH / 2, 50 }, White, true, "TETRIS");
     pGame->pStartingLevelText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf", 12, pGame->pRenderer, (SDL_Rect) { WINDOW_WIDTH / 2, 100 }, White, true, "STARTING LEVEL: %2d");
     pGame->pStartText = initText("./assets/BigBlueTermPlusNerdFont-Regular.ttf", FONT_SIZE, pGame->pRenderer, startButtonRect, White, true, "START");
-    if(!pGame->pTetrisText || !pGame->pStartingLevelText)
+    if (!pGame->pTetrisText || !pGame->pStartingLevelText)
     {
         printfd("Error: FONT\n");
         return 0;
@@ -64,11 +64,11 @@ int initGame(Game_t* pGame)
     pGame->highscores = initHighscore(pGame->pRenderer, (SDL_Rect) { 30, 150 });
     bool fileExists = loadHighscoresTxt(&pGame->highscores);
     printfd("fileExists: %d\n", fileExists);
-    if(fileExists == false)
+    if (fileExists == false)
     {
         printfd("STARTING GAME\n");
         createHighscoresTxtFile();
-        if(!loadHighscoresTxt(&pGame->highscores))
+        if (!loadHighscoresTxt(&pGame->highscores))
         {
             return 0;
         }
@@ -79,7 +79,7 @@ int initGame(Game_t* pGame)
 }
 void initBoard(Game_t* pGame)
 {
-    if(pGame->pBoard)
+    if (pGame->pBoard)
     {
         free(pGame->pBoard);
     }
@@ -94,23 +94,23 @@ void initBoard(Game_t* pGame)
 }
 void closeGame(Game_t* pGame)
 {
-    if(pGame->pRenderer)
+    if (pGame->pRenderer)
         SDL_DestroyRenderer(pGame->pRenderer);
-    if(pGame->pWindow)
+    if (pGame->pWindow)
         SDL_DestroyWindow(pGame->pWindow);
-    if(pGame->pBoard->pScoreText)
+    if (pGame->pBoard->pScoreText)
         destroyText(pGame->pBoard->pScoreText);
-    if(pGame->pBoard->pLevelText)
+    if (pGame->pBoard->pLevelText)
         destroyText(pGame->pBoard->pLevelText);
-    if(pGame->pBoard->pLinesText)
+    if (pGame->pBoard->pLinesText)
         destroyText(pGame->pBoard->pLinesText);
-    if(pGame->pBoard->pNextText)
+    if (pGame->pBoard->pNextText)
         destroyText(pGame->pBoard->pNextText);
-    if(!saveHighscoresTxt(&pGame->highscores))
+    if (!saveHighscoresTxt(&pGame->highscores))
     {
         printfd("ERROR SAVING FILE\n");
     }
-    if(pGame->pBoard)
+    if (pGame->pBoard)
         free(pGame->pBoard);
 
     SDL_Quit();
@@ -124,30 +124,30 @@ void runGame(Game_t* pGame)
 
     const int framesPerFall[29] = { 48,43,38,33,28,23,18,13,8,6,5,5,5,4,4,4,3,3,3,2,2,2,2,2,2,2,2,2,1 };
     pGame->gravity = pGame->player.startingLevel;
-    while(pGame->state == PLAY)
+    while (pGame->state == PLAY)
     {
         frameCounter++;
         SDL_SetRenderDrawColor(pGame->pRenderer, 0, 0, 0, 255);
         SDL_RenderClear(pGame->pRenderer);
         SDL_SetRenderDrawColor(pGame->pRenderer, 230, 230, 230, 255);
-        if(gameOverCheck(pGame->pBoard))
+        if (gameOverCheck(pGame->pBoard))
         {
             pGame->state = GAMEOVER;
             continue;
         }
         handleEvents(pGame);
-        
-        if(gameOverCheck(pGame->pBoard))
+
+        if (gameOverCheck(pGame->pBoard))
         {
             pGame->state = GAMEOVER;
             break;
         }
-        if(isTetrominoOnGround(pGame->pBoard))
+        if (isTetrominoOnGround(pGame->pBoard))
         {
             beginNextRound(pGame->pBoard, &pGame->player);
             pGame->gravity = pGame->player.level;
         }
-        else if((frameCounter % framesPerFall[min(pGame->gravity, 28)] == 0))
+        else if ((frameCounter % framesPerFall[min(pGame->gravity, 28)] == 0))
         {
 
             movePiece(pGame->pBoard, 0, 1);
@@ -165,14 +165,14 @@ void gameOverView(Game_t* pGame)
 {
 
     pGame->player.name[0] = '\0';
-    while(pGame->state == GAMEOVER)
+    while (pGame->state == GAMEOVER)
     {
 
         SDL_SetRenderDrawColor(pGame->pRenderer, 0, 0, 0, 255);
         SDL_RenderClear(pGame->pRenderer);
-        
+
         handleEvents(pGame);
-        
+
 
 
         updateText(pGame->pScoreText, pGame->player.score);
@@ -193,7 +193,7 @@ void mainMenuView(Game_t* pGame)
     int level = 0;
     int mouseX, mouseY;
 
-    while(pGame->state == MENU)
+    while (pGame->state == MENU)
     {
 
 
@@ -201,9 +201,9 @@ void mainMenuView(Game_t* pGame)
 
         SDL_SetRenderDrawColor(pGame->pRenderer, 0, 0, 0, 255);
         SDL_RenderClear(pGame->pRenderer);
-        
+
         handleEvents(pGame);
-        
+
         updateText(pGame->pStartingLevelText, pGame->player.startingLevel);
 
         SDL_SetRenderDrawColor(pGame->pRenderer, 0, 200, 0, 255);
@@ -225,59 +225,59 @@ void handleEvents(Game_t* pGame)
     int mouseX, mouseY;
     SDL_GetMouseState(&mouseX, &mouseY);
     SDL_Rect startButtonRect = center(pGame->pStartText->rect);
-    while(SDL_PollEvent(&pGame->event))
+    while (SDL_PollEvent(&pGame->event))
     {
-        if(pGame->event.type == SDL_QUIT)
+        if (pGame->event.type == SDL_QUIT)
         {
             pGame->state = QUIT;
             break;
         }
-        if(pGame->state == PLAY)
+        if (pGame->state == PLAY)
         {
-            if(pGame->event.key.type == SDL_KEYDOWN)
+            if (pGame->event.key.type == SDL_KEYDOWN)
             {
                 handleInput(pGame);
             }
-            else if(pGame->event.key.type == SDL_KEYUP && pGame->event.key.keysym.scancode == SDL_SCANCODE_SPACE)
+            else if (pGame->event.key.type == SDL_KEYUP && pGame->event.key.keysym.scancode == SDL_SCANCODE_SPACE)
             {
                 pGame->gravity = pGame->player.level;
             }
         }
-        else if(pGame->state == GAMEOVER)
+        else if (pGame->state == GAMEOVER)
         {
 
-            if(pGame->event.type == SDL_KEYDOWN)
+            if (pGame->event.type == SDL_KEYDOWN)
             {
                 textInput(pGame->event, pGame->player.name);
-                if(pGame->event.key.keysym.sym == SDLK_RETURN && strlen(pGame->player.name) >= 1)
+                if (pGame->event.key.keysym.sym == SDLK_RETURN && strlen(pGame->player.name) >= 1)
                 {
                     pGame->state = MENU;
                     insertScore(&pGame->highscores, pGame->player);
-                    if(!saveHighscoresTxt(&pGame->highscores))
+                    if (!saveHighscoresTxt(&pGame->highscores))
                         printfd("ERROR SAVING FILE\n");
                     pGame->highscores.size = 0;
 
 
-                    if(!loadHighscoresTxt(&pGame->highscores))
+                    if (!loadHighscoresTxt(&pGame->highscores))
                         printfd("ERROR LOADING FILE\n");
 
                 }
             }
         }
         else if (pGame->state == MENU) {
-            if(pGame->event.button.state == SDL_PRESSED && pointRectCollision(mouseX, mouseY, startButtonRect))
+            if (pGame->event.button.state == SDL_PRESSED && pointRectCollision(mouseX, mouseY, startButtonRect))
             {
                 printfd("PRESSED\n");
                 pGame->player.level = pGame->player.startingLevel;
                 pGame->state = PLAY;
             }
-            if(pGame->event.type == SDL_KEYDOWN)
+            if (pGame->event.type == SDL_KEYDOWN)
             {
-                if(pGame->event.key.keysym.sym == SDLK_UP && pGame->player.startingLevel < 29)
+                if (pGame->event.key.keysym.sym == SDLK_UP && pGame->player.startingLevel < 29)
                 {
                     pGame->player.startingLevel += 1;
                 }
-                if(pGame->event.key.keysym.sym == SDLK_DOWN && pGame->player.startingLevel > 0)
+                if (pGame->event.key.keysym.sym == SDLK_DOWN && pGame->player.startingLevel > 0)
                 {
                     pGame->player.startingLevel -= 1;
                 }
@@ -292,38 +292,38 @@ void handleInput(Game_t* pGame)
     bool spinright = xor (pGame->keysPressed[SDL_SCANCODE_W], pGame->keysPressed[SDL_SCANCODE_UP]);
     bool spinleft = xor (pGame->keysPressed[SDL_SCANCODE_S], pGame->keysPressed[SDL_SCANCODE_DOWN]);
 
-    if(left)
+    if (left)
     {
         movePiece(pGame->pBoard, -1, 0);
     }
-    if(right)
+    if (right)
     {
         movePiece(pGame->pBoard, +1, 0);
     }
-    if(spinright)
+    if (spinright)
     {
         rotatePiece(pGame->pBoard, 1);
     }
-    if(spinleft)
+    if (spinleft)
     {
         rotatePiece(pGame->pBoard, -1);
     }
-    if(pGame->keysPressed[SDL_SCANCODE_K])
+    if (pGame->keysPressed[SDL_SCANCODE_K])
     {
         pGame->player.lines += 1;
     }
-    if(pGame->keysPressed[SDL_SCANCODE_L])
+    if (pGame->keysPressed[SDL_SCANCODE_L])
     {
         pGame->player.level += 1;
     }
-    if(pGame->keysPressed[SDL_SCANCODE_ESCAPE])
+    if (pGame->keysPressed[SDL_SCANCODE_ESCAPE])
     {
         pGame->state = MENU;
     }
     if (pGame->keysPressed[SDL_SCANCODE_B]) {
         hardDrop(pGame->pBoard);
     }
-    if(pGame->keysPressed[SDL_SCANCODE_SPACE] && pGame->pBoard->onGround == false && pGame->player.level < 29)
+    if (pGame->keysPressed[SDL_SCANCODE_SPACE] && pGame->pBoard->onGround == false && pGame->player.level < 29)
     {
         pGame->gravity = 18;
     }

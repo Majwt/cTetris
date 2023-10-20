@@ -3,7 +3,7 @@
 
 #include <SDL.h>
 #include <SDL_ttf.h>
-#include "standard.h"
+#include "common.h"
 #include "defines.h"
 #include "highscore.h"
 #include "text.h"
